@@ -67,7 +67,7 @@ Antarmuka web modern dengan Tailwind CSS, mendukung tema terang dan gelap.
 ### 1. Clone repository
 
 ```bash
-git clone https://github.com/username/crosspost.git
+git clone https://github.com/1amkaiz3n/CrossPost.git
 cd crosspost
 ```
 
