@@ -2,6 +2,10 @@
 
 **Self-hosted social media publisher** — upload konten sekali, publikasikan ke banyak platform secara otomatis.
 
+> ⚠️ **PERINGATAN KEAMANAN**
+>
+> Project ini hanya cocok untuk **penggunaan lokal / development**. Tidak ada autentikasi pengguna, enkripsi data, atau proteksi akses yang memadai. **Jangan deploy ke publik** — credential API, token OAuth, dan data Anda bisa bocor. Gunakan hanya di localhost atau jaringan lokal yang aman.
+
 ---
 
 ## Fitur
