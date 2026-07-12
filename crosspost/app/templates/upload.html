@@ -1,0 +1,616 @@
+{% extends "base.html" %}
+{% block page_title %}Upload{% endblock %}
+{% block content %}
+<div class="max-w-3xl mx-auto">
+    <div class="glass rounded-2xl p-6 lg:p-8">
+        <!-- Wizard Header -->
+        <div class="mb-8 relative">
+            <div class="flex justify-between items-center">
+                <div class="flex-1 text-center relative z-10 cursor-pointer" onclick="goToStep(1)">
+                    <div id="step-indicator-1" class="w-10 h-10 mx-auto rounded-full flex items-center justify-center text-white font-bold text-lg bg-primary-500 transition-all duration-300">1</div>
+                    <p class="text-xs font-medium mt-2 text-primary-600 dark:text-primary-400">Media Upload</p>
+                </div>
+                <div class="flex-1 text-center relative z-10 cursor-pointer" onclick="goToStep(2)">
+                    <div id="step-indicator-2" class="w-10 h-10 mx-auto rounded-full flex items-center justify-center text-gray-500 dark:text-gray-400 font-bold text-lg bg-gray-200 dark:bg-gray-700 transition-all duration-300">2</div>
+                    <p class="text-xs font-medium mt-2 text-gray-500 dark:text-gray-400">Content Details</p>
+                </div>
+                <div class="flex-1 text-center relative z-10 cursor-pointer" onclick="goToStep(3)">
+                    <div id="step-indicator-3" class="w-10 h-10 mx-auto rounded-full flex items-center justify-center text-gray-500 dark:text-gray-400 font-bold text-lg bg-gray-200 dark:bg-gray-700 transition-all duration-300">3</div>
+                    <p class="text-xs font-medium mt-2 text-gray-500 dark:text-gray-400">Platform Selection</p>
+                </div>
+                <div class="flex-1 text-center relative z-10 cursor-pointer" onclick="goToStep(4)">
+                    <div id="step-indicator-4" class="w-10 h-10 mx-auto rounded-full flex items-center justify-center text-gray-500 dark:text-gray-400 font-bold text-lg bg-gray-200 dark:bg-gray-700 transition-all duration-300">4</div>
+                    <p class="text-xs font-medium mt-2 text-gray-500 dark:text-gray-400">Review & Publish</p>
+                </div>
+                <div class="absolute top-[25px] left-0 w-full h-0.5 bg-gray-200 dark:bg-gray-700 z-0">
+                    <div id="progress-bar" class="h-full bg-primary-500 transition-all duration-300" style="width: 0%;"></div>
+                </div>
+            </div>
+        </div>
+
+        <form id="upload-form" enctype="multipart/form-data">
+            <div id="wizard-steps-container">
+                <!-- Step 1: Media Upload -->
+                <div class="wizard-step active" data-step="1">
+                    <div class="space-y-6">
+                        <div>
+                            <label class="block text-sm font-semibold mb-3">Upload File</label>
+                            <div id="drop-zone" class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-2xl p-12 text-center hover:border-primary-500 dark:hover:border-primary-500 transition-colors cursor-pointer bg-gray-50 dark:bg-gray-800/50">
+                                <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-primary-500/10 flex items-center justify-center">
+                                    <svg class="w-8 h-8 text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+                                </div>
+                                <p class="text-base text-gray-700 dark:text-gray-300 font-medium">Drag & drop file di sini atau klik untuk memilih</p>
+                                <p class="text-xs text-gray-400 mt-2">Video (MP4, MOV, AVI) atau Gambar (JPG, PNG, GIF) - Maks 500MB</p>
+                                <input type="file" id="file-input" name="file" class="hidden" accept=".mp4,.mov,.avi,.mkv,.webm,.jpg,.jpeg,.png,.gif,.webp">
+                            </div>
+                            <div id="file-info" class="hidden mt-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <div id="file-icon" class="w-10 h-10 rounded-lg bg-primary-500 flex items-center justify-center flex-shrink-0">
+                                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                        </div>
+                                        <div class="min-w-0">
+                                            <p id="file-name" class="text-sm font-semibold text-gray-900 dark:text-white truncate"></p>
+                                            <p id="file-size" class="text-xs text-gray-500"></p>
+                                        </div>
+                                    </div>
+                                    <button type="button" onclick="removeFile()" class="p-2 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 text-red-600 dark:text-red-400 flex-shrink-0">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="file-preview" class="hidden mt-4 rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800 max-h-64 flex items-center justify-center">
+                                <img id="preview-image" class="hidden max-w-full max-h-64 object-contain">
+                                <video id="preview-video" class="hidden max-w-full max-h-64" controls></video>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold mb-3">Thumbnail (opsional, untuk YouTube)</label>
+                            <div id="thumbnail-drop-zone" class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-6 text-center hover:border-primary-500 dark:hover:border-primary-500 transition-colors cursor-pointer bg-gray-50 dark:bg-gray-800/50 relative">
+                                <input type="file" id="thumbnail-input" name="thumbnail" class="hidden" accept="image/*">
+                                <div id="thumbnail-placeholder" class="flex items-center justify-center space-x-2">
+                                    <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">Klik untuk upload thumbnail</p>
+                                </div>
+                                <div id="thumbnail-preview-container" class="hidden absolute inset-0 flex items-center justify-center bg-gray-50 dark:bg-gray-800/50 rounded-xl">
+                                    <img id="thumbnail-preview" class="max-w-full max-h-full object-contain p-2">
+                                    <button type="button" onclick="removeThumbnail()" class="absolute top-2 right-2 p-1 rounded-full bg-black/50 text-white hover:bg-black/70">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Content Details -->
+                <div class="wizard-step hidden" data-step="2">
+                    <div class="space-y-5">
+                        <div>
+                            <label class="block text-sm font-semibold mb-2">Judul</label>
+                            <input type="text" name="title" id="title-input" required
+                                class="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
+                                placeholder="Masukkan judul konten">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-2">Deskripsi</label>
+                            <textarea name="description" id="description-input" rows="3"
+                                class="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
+                                placeholder="Masukkan deskripsi konten"></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-2">Tags (pisahkan dengan koma)</label>
+                            <input type="text" name="tags" id="tags-input"
+                                class="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
+                                placeholder="tag1, tag2, tag3">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-2">Visibility</label>
+                            <select name="visibility" id="visibility-input"
+                                class="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all">
+                                <option value="public">Public</option>
+                                <option value="private">Private</option>
+                                <option value="unlisted">Unlisted</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3: Platform Selection -->
+                <div class="wizard-step hidden" data-step="3">
+                    <div class="space-y-4">
+                        <label class="block text-sm font-semibold mb-3">Pilih Platform yang ingin di-publish:</label>
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                            <label class="platform-checkbox relative flex items-center gap-3 p-4 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-primary-500 dark:hover:border-primary-500 transition-colors has-checked:border-primary-500 has-checked:bg-primary-500/5 hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                                <input type="checkbox" name="platforms" value="youtube" class="w-5 h-5 rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+                                <span class="font-medium">YouTube</span>
+                                <i class="fa-brands fa-youtube text-red-600 ml-auto text-xl"></i>
+                            </label>
+                            <label class="platform-checkbox relative flex items-center gap-3 p-4 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-primary-500 dark:hover:border-primary-500 transition-colors has-checked:border-primary-500 has-checked:bg-primary-500/5 hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                                <input type="checkbox" name="platforms" value="facebook" class="w-5 h-5 rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+                                <span class="font-medium">Facebook</span>
+                                <i class="fa-brands fa-facebook text-blue-600 ml-auto text-xl"></i>
+                            </label>
+                            <label class="platform-checkbox relative flex items-center gap-3 p-4 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-primary-500 dark:hover:border-primary-500 transition-colors has-checked:border-primary-500 has-checked:bg-primary-500/5 hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                                <input type="checkbox" name="platforms" value="instagram" class="w-5 h-5 rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+                                <span class="font-medium">Instagram</span>
+                                <i class="fa-brands fa-instagram text-pink-600 ml-auto text-xl"></i>
+                            </label>
+                            <label class="platform-checkbox relative flex items-center gap-3 p-4 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-primary-500 dark:hover:border-primary-500 transition-colors has-checked:border-primary-500 has-checked:bg-primary-500/5 hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                                <input type="checkbox" name="platforms" value="linkedin" class="w-5 h-5 rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+                                <span class="font-medium">LinkedIn</span>
+                                <i class="fa-brands fa-linkedin text-blue-700 ml-auto text-xl"></i>
+                            </label>
+                            <label class="platform-checkbox relative flex items-center gap-3 p-4 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-primary-500 dark:hover:border-primary-500 transition-colors has-checked:border-primary-500 has-checked:bg-primary-500/5 hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                                <input type="checkbox" name="platforms" value="threads" class="w-5 h-5 rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+                                <span class="font-medium">Threads</span>
+                                <i class="fa-brands fa-threads text-gray-600 ml-auto text-xl"></i>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 4: Review -->
+                <div class="wizard-step hidden" data-step="4">
+                    <div class="space-y-6">
+                        <div class="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-5">
+                            <h4 class="text-sm font-semibold mb-3">Ringkasan Konten</h4>
+                            <div class="space-y-3">
+                                <div>
+                                    <p class="text-xs text-gray-500 uppercase tracking-wider">File Utama</p>
+                                    <p id="review-file-name" class="text-sm font-medium text-gray-900 dark:text-white">-</p>
+                                </div>
+                                <div id="review-thumbnail-container">
+                                    <p class="text-xs text-gray-500 uppercase tracking-wider">Thumbnail</p>
+                                    <p id="review-thumbnail-name" class="text-sm font-medium text-gray-900 dark:text-white">-</p>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-gray-500 uppercase tracking-wider">Judul</p>
+                                    <p id="review-title" class="text-sm font-medium text-gray-900 dark:text-white">-</p>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-gray-500 uppercase tracking-wider">Deskripsi</p>
+                                    <p id="review-description" class="text-sm font-medium text-gray-900 dark:text-white whitespace-pre-wrap">-</p>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-gray-500 uppercase tracking-wider">Tags</p>
+                                    <p id="review-tags" class="text-sm font-medium text-gray-900 dark:text-white">-</p>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-gray-500 uppercase tracking-wider">Visibility</p>
+                                    <p id="review-visibility" class="text-sm font-medium text-gray-900 dark:text-white">-</p>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-gray-500 uppercase tracking-wider">Platform Dipilih</p>
+                                    <p id="review-platforms" class="text-sm font-medium text-gray-900 dark:text-white">-</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Schedule Toggle -->
+                        <div class="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-5">
+                            <div class="flex items-center justify-between mb-4">
+                                <h4 class="text-sm font-semibold">Jadwalkan Publikasi</h4>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" id="schedule-toggle" class="sr-only peer" onchange="toggleSchedule()">
+                                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary-600"></div>
+                                </label>
+                            </div>
+                            <div id="schedule-options" class="hidden space-y-4">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-xs font-medium mb-1.5">Tanggal & Waktu</label>
+                                        <input type="datetime-local" id="scheduled-at-input"
+                                            class="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-primary-500 outline-none transition-all text-sm">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium mb-1.5">Timezone</label>
+                                        <select id="timezone-input"
+                                            class="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-primary-500 outline-none transition-all text-sm">
+                                            <option value="Asia/Jakarta">Asia/Jakarta (WIB)</option>
+                                            <option value="Asia/Makassar">Asia/Makassar (WITA)</option>
+                                            <option value="Asia/Jayapura">Asia/Jayapura (WIT)</option>
+                                            <option value="UTC">UTC</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <p class="text-xs text-gray-400">Setelah waktu yang ditentukan, konten akan otomatis dipublikasikan ke platform yang dipilih.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-between mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
+                <button type="button" id="prev-btn" onclick="prevStep()" class="hidden px-6 py-3 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-semibold transition-colors">
+                    <svg class="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                    Kembali
+                </button>
+                <div class="flex gap-4">
+                    <button type="button" id="next-btn" onclick="nextStep()" class="px-6 py-3 rounded-xl bg-primary-600 hover:bg-primary-700 text-white font-semibold transition-colors flex items-center">
+                        Lanjut
+                        <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                    </button>
+                    <button type="submit" id="publish-btn" class="hidden px-8 py-3 rounded-xl bg-gradient-to-r from-primary-600 to-purple-600 hover:from-primary-700 hover:to-purple-700 text-white font-bold shadow-lg shadow-primary-500/30 transition-all transform hover:scale-[1.02] active:scale-[0.98] flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                        Publish Now
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div id="upload-progress" class="hidden mt-6 space-y-4"></div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+let currentStep = 1;
+const totalSteps = 4;
+let selectedFile = null;
+let previewUrl = null;
+let selectedThumbnail = null;
+let thumbnailPreviewUrl = null;
+
+// --- Utility Functions ---
+function formatSize(bytes) {
+    if (bytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+}
+
+function getFileIconSVG(mimeType) {
+    if (mimeType.startsWith('video/')) return '<svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4-4-4-4m-6 14l4-4-4-4"/></svg>';
+    if (mimeType.startsWith('image/')) return '<svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>';
+    return '<svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>';
+}
+
+function showToast(message, type = 'success') {
+    const container = document.getElementById('toast-container');
+    const colors = {
+        success: 'bg-green-600',
+        error: 'bg-red-600',
+        warning: 'bg-yellow-600',
+        info: 'bg-primary-600'
+    };
+    const icons = {
+        success: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>',
+        error: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>',
+        warning: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z"/></svg>',
+        info: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>'
+    };
+    const toast = document.createElement('div');
+    toast.className = `toast flex items-center gap-3 px-4 py-3 rounded-xl text-white text-sm font-medium shadow-lg ${colors[type] || colors.info}`;
+    toast.innerHTML = `${icons[type] || icons.info} ${message}`;
+    container.appendChild(toast);
+    setTimeout(() => toast.remove(), 4000);
+}
+
+// --- Step Management ---
+function updateStepUI() {
+    document.querySelectorAll('.wizard-step').forEach(step => {
+        step.classList.add('hidden');
+    });
+    document.querySelector(`.wizard-step[data-step="${currentStep}"]`).classList.remove('hidden');
+
+    document.querySelectorAll('[id^="step-indicator-"]').forEach(indicator => {
+        const stepNum = parseInt(indicator.id.replace('step-indicator-', ''));
+        if (stepNum < currentStep) {
+            indicator.classList.remove('bg-gray-200', 'dark:bg-gray-700', 'text-gray-500', 'dark:text-gray-400');
+            indicator.classList.add('bg-primary-500', 'text-white');
+        } else if (stepNum === currentStep) {
+            indicator.classList.remove('bg-gray-200', 'dark:bg-gray-700', 'text-gray-500', 'dark:text-gray-400');
+            indicator.classList.add('bg-primary-500', 'text-white');
+        } else {
+            indicator.classList.remove('bg-primary-500', 'text-white');
+            indicator.classList.add('bg-gray-200', 'dark:bg-gray-700', 'text-gray-500', 'dark:text-gray-400');
+        }
+    });
+    document.querySelector(`#step-indicator-${currentStep} + p`).classList.remove('text-gray-500', 'dark:text-gray-400');
+    document.querySelector(`#step-indicator-${currentStep} + p`).classList.add('text-primary-600', 'dark:text-primary-400');
+
+    const progressBarWidth = ((currentStep - 1) / (totalSteps - 1)) * 100;
+    document.getElementById('progress-bar').style.width = `${progressBarWidth}%`;
+
+    document.getElementById('prev-btn').classList.toggle('hidden', currentStep === 1);
+    document.getElementById('next-btn').classList.toggle('hidden', currentStep === totalSteps);
+    document.getElementById('publish-btn').classList.toggle('hidden', currentStep !== totalSteps);
+
+    if (currentStep === totalSteps) {
+        populateReviewStep();
+    }
+}
+
+function nextStep() {
+    if (!validateCurrentStep()) return;
+    if (currentStep < totalSteps) {
+        currentStep++;
+        updateStepUI();
+    }
+}
+
+function prevStep() {
+    if (currentStep > 1) {
+        currentStep--;
+        updateStepUI();
+    }
+}
+
+function validateCurrentStep() {
+    if (currentStep === 1) {
+        if (!selectedFile) {
+            showToast('Silakan upload file utama Anda.', 'warning');
+            return false;
+        }
+    } else if (currentStep === 2) {
+        const title = document.getElementById('title-input').value.trim();
+        if (!title) {
+            showToast('Judul konten harus diisi.', 'warning');
+            return false;
+        }
+    } else if (currentStep === 3) {
+        const checkedPlatforms = [...document.querySelectorAll('input[name="platforms"]:checked')];
+        if (checkedPlatforms.length === 0) {
+            showToast('Pilih minimal satu platform untuk publikasi.', 'warning');
+            return false;
+        }
+    }
+    return true;
+}
+
+// --- File Upload & Preview --- 
+document.getElementById('drop-zone').addEventListener('click', () => document.getElementById('file-input').click());
+document.getElementById('drop-zone').addEventListener('dragover', (e) => { e.preventDefault(); e.currentTarget.classList.add('border-primary-500'); });
+document.getElementById('drop-zone').addEventListener('dragleave', (e) => { e.preventDefault(); e.currentTarget.classList.remove('border-primary-500'); });
+document.getElementById('drop-zone').addEventListener('drop', (e) => {
+    e.preventDefault();
+    e.currentTarget.classList.remove('border-primary-500');
+    if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+});
+document.getElementById('file-input').addEventListener('change', (e) => {
+    if (e.target.files.length) handleFile(e.target.files[0]);
+});
+
+function handleFile(file) {
+    selectedFile = file;
+    document.getElementById('drop-zone').classList.add('hidden');
+    document.getElementById('file-info').classList.remove('hidden');
+    document.getElementById('file-name').textContent = file.name;
+    document.getElementById('file-size').textContent = formatSize(file.size);
+    document.getElementById('file-icon').innerHTML = getFileIconSVG(file.type);
+    showPreview(file);
+}
+
+function showPreview(file) {
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    previewUrl = URL.createObjectURL(file);
+
+    const preview = document.getElementById('file-preview');
+    const img = document.getElementById('preview-image');
+    const video = document.getElementById('preview-video');
+
+    img.classList.add('hidden');
+    video.classList.add('hidden');
+
+    if (file.type.startsWith('video/')) {
+        video.src = previewUrl;
+        video.classList.remove('hidden');
+        preview.classList.remove('hidden');
+    } else if (file.type.startsWith('image/')) {
+        img.src = previewUrl;
+        img.classList.remove('hidden');
+        preview.classList.remove('hidden');
+    } else {
+        preview.classList.add('hidden');
+    }
+}
+
+function removeFile() {
+    selectedFile = null;
+    document.getElementById('file-input').value = '';
+    document.getElementById('file-info').classList.add('hidden');
+    document.getElementById('file-preview').classList.add('hidden');
+    document.getElementById('preview-image').classList.add('hidden');
+    document.getElementById('preview-video').classList.add('hidden');
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    previewUrl = null;
+    document.getElementById('drop-zone').classList.remove('hidden');
+}
+
+// --- Thumbnail Upload & Preview ---
+document.getElementById('thumbnail-drop-zone').addEventListener('click', () => document.getElementById('thumbnail-input').click());
+document.getElementById('thumbnail-input').addEventListener('change', (e) => {
+    if (e.target.files.length) handleThumbnailFile(e.target.files[0]);
+});
+
+function handleThumbnailFile(file) {
+    selectedThumbnail = file;
+    if (thumbnailPreviewUrl) URL.revokeObjectURL(thumbnailPreviewUrl);
+    thumbnailPreviewUrl = URL.createObjectURL(file);
+
+    document.getElementById('thumbnail-placeholder').classList.add('hidden');
+    document.getElementById('thumbnail-preview-container').classList.remove('hidden');
+    document.getElementById('thumbnail-preview').src = thumbnailPreviewUrl;
+}
+
+function removeThumbnail() {
+    selectedThumbnail = null;
+    document.getElementById('thumbnail-input').value = '';
+    if (thumbnailPreviewUrl) URL.revokeObjectURL(thumbnailPreviewUrl);
+    thumbnailPreviewUrl = null;
+
+    document.getElementById('thumbnail-placeholder').classList.remove('hidden');
+    document.getElementById('thumbnail-preview-container').classList.add('hidden');
+    document.getElementById('thumbnail-preview').src = '';
+}
+
+// --- Schedule Toggle ---
+function toggleSchedule() {
+    const enabled = document.getElementById('schedule-toggle').checked;
+    document.getElementById('schedule-options').classList.toggle('hidden', !enabled);
+    const btn = document.getElementById('publish-btn');
+    if (enabled) {
+        btn.innerHTML = '<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/></svg> Schedule';
+        // Set min datetime to now
+        const now = new Date();
+        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+        document.getElementById('scheduled-at-input').min = now.toISOString().substring(0, 16);
+    } else {
+        btn.innerHTML = '<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg> Publish Now';
+    }
+}
+
+// --- Review Step Population ---
+function populateReviewStep() {
+    document.getElementById('review-file-name').textContent = selectedFile ? selectedFile.name : '-';
+    document.getElementById('review-title').textContent = document.getElementById('title-input').value.trim() || '-';
+    document.getElementById('review-description').textContent = document.getElementById('description-input').value.trim() || '-';
+    document.getElementById('review-tags').textContent = document.getElementById('tags-input').value.trim() || '-';
+    document.getElementById('review-visibility').textContent = document.getElementById('visibility-input').value;
+
+    if (selectedThumbnail) {
+        document.getElementById('review-thumbnail-name').textContent = selectedThumbnail.name;
+        document.getElementById('review-thumbnail-container').classList.remove('hidden');
+    } else {
+        document.getElementById('review-thumbnail-container').classList.add('hidden');
+    }
+
+    const selectedPlatforms = [...document.querySelectorAll('input[name="platforms"]:checked')]
+        .map(checkbox => platformNames[checkbox.value] || checkbox.value);
+    document.getElementById('review-platforms').textContent = selectedPlatforms.join(', ') || '-';
+}
+
+// --- Form Submission ---
+document.getElementById('upload-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!validateCurrentStep()) return; // Re-validate one last time
+
+    const formData = new FormData();
+    if (selectedFile) formData.set('file', selectedFile);
+    if (selectedThumbnail) formData.set('thumbnail', selectedThumbnail);
+    formData.set('title', document.getElementById('title-input').value.trim());
+    formData.set('description', document.getElementById('description-input').value.trim());
+    formData.set('tags', document.getElementById('tags-input').value.trim());
+    formData.set('visibility', document.getElementById('visibility-input').value);
+
+    const checkedPlatforms = [...document.querySelectorAll('input[name="platforms"]:checked')].map(c => c.value);
+    formData.set('platforms', checkedPlatforms.join(','));
+
+    const isScheduled = document.getElementById('schedule-toggle').checked;
+    if (isScheduled) {
+        const dt = document.getElementById('scheduled-at-input').value;
+        if (!dt) {
+            showToast('Pilih tanggal dan waktu untuk jadwal', 'warning');
+            return;
+        }
+        formData.set('scheduled_at', dt + ':00');
+    }
+
+    const btn = document.getElementById('publish-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<div class="loading-spinner"></div> Processing...';
+
+    document.getElementById('upload-progress').classList.remove('hidden');
+
+    try {
+        const resp = await fetch('/api/upload', { method: 'POST', body: formData });
+        const data = await resp.json();
+        if (data.success) {
+            if (data.scheduled) {
+                showToast('Konten akan dipublikasikan sesuai jadwal!', 'success');
+            } else {
+                showToast('Upload sedang diproses!', 'success');
+                startProgressPolling(data.upload_id);
+            }
+            // Reset form after successful upload initiation
+            e.target.reset();
+            removeFile();
+            removeThumbnail();
+            document.getElementById('schedule-toggle').checked = false;
+            document.getElementById('schedule-options').classList.add('hidden');
+            currentStep = 1; // Reset to first step
+            updateStepUI();
+        } else {
+            showToast(data.detail || 'Upload gagal', 'error');
+            btn.disabled = false;
+            const label = isScheduled ? 'Schedule' : 'Publish Now';
+            btn.innerHTML = `<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg> ${label}`;
+        }
+    } catch (err) {
+        showToast('Upload gagal: ' + err.message, 'error');
+        btn.disabled = false;
+        const label = isScheduled ? 'Schedule' : 'Publish Now';
+        btn.innerHTML = `<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg> ${label}`;
+    }
+});
+
+const platformNames = { youtube: 'YouTube', facebook: 'Facebook', instagram: 'Instagram', linkedin: 'LinkedIn', threads: 'Threads' };
+const platformColors = { youtube: 'red', facebook: 'blue', instagram: 'pink', linkedin: 'blue-700', threads: 'gray' };
+
+function startProgressPolling(uploadId) {
+    const container = document.getElementById('upload-progress');
+    container.classList.remove('hidden');
+    container.innerHTML = '<h3 class="text-lg font-semibold mb-4">Upload Progress</h3><div id="progress-platforms" class="space-y-3"></div>';
+
+    const interval = setInterval(async () => {
+        try {
+            const resp = await fetch(`/api/upload/${uploadId}`);
+            const data = await resp.json();
+            renderProgress(data);
+
+            if (data.status === 'completed' || data.status === 'partial') {
+                clearInterval(interval);
+            }
+        } catch (e) {
+            console.error('Polling error:', e);
+            // Optionally show an error toast if polling fails repeatedly
+        }
+    }, 2000);
+}
+
+function renderProgress(data) {
+    const container = document.getElementById('progress-platforms');
+    if (!container) return;
+
+    let html = '';
+    for (const [platform, status] of Object.entries(data.statuses || {})) {
+        const progress = status.progress || 0;
+        const statusText = status.status;
+        const statusColor = statusText === 'success' ? 'text-green-500' : statusText === 'error' ? 'text-red-500' : statusText === 'uploading' ? 'text-primary-500' : 'text-gray-500';
+        const barColor = statusText === 'success' ? 'bg-green-500' : statusText === 'error' ? 'bg-red-500' : 'bg-primary-500';
+
+        html += `
+        <div class="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-sm font-medium">${platformNames[platform] || platform}</span>
+                <span class="text-sm font-medium ${statusColor}">${statusText === 'uploading' ? 'Uploading...' : statusText === 'success' ? 'Success' : statusText === 'error' ? (status.error || 'Failed') : 'Pending'}</span>
+            </div>
+            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                <div class="progress-bar ${barColor} h-2 rounded-full" style="width: ${progress}%"></div>
+            </div>
+            <span class="text-xs text-gray-500 mt-1">${progress}%</span>
+        </div>`;
+    }
+    container.innerHTML = html;
+}
+
+// Initial UI setup
+updateStepUI();
+
+// Load tags template on startup
+async function loadTagsTemplate() {
+    try {
+        const settings = await fetch('/api/settings').then(r => r.json());
+        if (settings.tags_template) {
+            document.getElementById('tags-input').value = settings.tags_template;
+        }
+    } catch (e) {
+        console.error("Failed to load tags template:", e);
+    }
+}
+loadTagsTemplate();
+</script>
+{% endblock %}

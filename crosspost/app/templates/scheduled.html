@@ -1,0 +1,343 @@
+{% extends "base.html" %}
+{% block page_title %}Scheduled Posts{% endblock %}
+{% block content %}
+<div class="space-y-6">
+    <!-- Filters -->
+    <div class="flex flex-col lg:flex-row items-stretch lg:items-center gap-3">
+        <div class="relative flex-1 min-w-0">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            </span>
+            <input type="text" id="search-schedules" oninput="filterSchedules()" placeholder="Cari berdasarkan judul atau konten..." class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all text-sm">
+        </div>
+        <select id="filter-platform" onchange="filterSchedules()" class="px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-primary-500 outline-none transition-all text-sm">
+            <option value="">All Platforms</option>
+            <option value="youtube">YouTube</option>
+            <option value="facebook">Facebook</option>
+            <option value="instagram">Instagram</option>
+            <option value="linkedin">LinkedIn</option>
+            <option value="threads">Threads</option>
+        </select>
+        <select id="filter-status" onchange="filterSchedules()" class="px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-primary-500 outline-none transition-all text-sm">
+            <option value="">All Status</option>
+            <option value="scheduled">Scheduled</option>
+            <option value="publishing">Publishing</option>
+            <option value="published">Published</option>
+            <option value="failed">Failed</option>
+            <option value="cancelled">Cancelled</option>
+        </select>
+        <input type="date" id="filter-date-from" onchange="filterSchedules()" class="px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-primary-500 outline-none transition-all text-sm">
+        <input type="date" id="filter-date-to" onchange="filterSchedules()" class="px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-primary-500 outline-none transition-all text-sm">
+    </div>
+
+    <!-- Schedules Grid -->
+    <div id="schedules-grid" class="space-y-3">
+        <div class="text-center py-12 text-gray-500">Memuat data...</div>
+    </div>
+</div>
+
+<!-- Edit Modal -->
+<div id="edit-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden p-4">
+    <div class="fixed inset-0 bg-black/30 dark:bg-black/50" onclick="closeEditModal()"></div>
+    <div class="modal-content bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-lg w-full mx-auto shadow-xl border border-gray-200 dark:border-gray-700 relative z-10 max-h-[90vh] overflow-y-auto">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Edit Jadwal</h3>
+        <input type="hidden" id="edit-id">
+        <div class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium mb-1">Judul</label>
+                <input type="text" id="edit-title" class="w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-primary-500 outline-none transition-all text-sm">
+            </div>
+            <div>
+                <label class="block text-sm font-medium mb-1">Deskripsi</label>
+                <textarea id="edit-description" rows="3" class="w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-primary-500 outline-none transition-all text-sm"></textarea>
+            </div>
+            <div>
+                <label class="block text-sm font-medium mb-1">Tags (koma)</label>
+                <input type="text" id="edit-tags" class="w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-primary-500 outline-none transition-all text-sm">
+            </div>
+            <div>
+                <label class="block text-sm font-medium mb-1">Visibility</label>
+                <select id="edit-visibility" class="w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-primary-500 outline-none transition-all text-sm">
+                    <option value="public">Public</option>
+                    <option value="private">Private</option>
+                    <option value="unlisted">Unlisted</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-medium mb-1">Platform</label>
+                <div id="edit-platforms" class="grid grid-cols-2 gap-2"></div>
+            </div>
+            <div>
+                <label class="block text-sm font-medium mb-1">Jadwal Publikasi</label>
+                <input type="datetime-local" id="edit-scheduled-at" class="w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-primary-500 outline-none transition-all text-sm">
+            </div>
+        </div>
+        <div class="flex gap-3 justify-end mt-6">
+            <button onclick="closeEditModal()" class="px-4 py-2 rounded-lg text-sm font-medium bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">Batal</button>
+            <button onclick="saveEdit()" class="px-4 py-2 rounded-lg text-sm font-medium bg-primary-600 hover:bg-primary-700 text-white transition-colors">Simpan</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+let allSchedules = [];
+
+const platformConfig = {
+    youtube: { icon: 'fa-youtube', color: 'red', label: 'YouTube' },
+    facebook: { icon: 'fa-facebook', color: 'blue', label: 'Facebook' },
+    instagram: { icon: 'fa-instagram', color: 'pink', label: 'Instagram' },
+    linkedin: { icon: 'fa-linkedin', color: 'blue-700', label: 'LinkedIn' },
+    threads: { icon: 'fa-threads', color: 'gray', label: 'Threads' },
+};
+
+const statusConfig = {
+    scheduled: { label: 'Scheduled', color: 'text-primary-500', bg: 'bg-primary-500/10 border-primary-500/20' },
+    publishing: { label: 'Publishing', color: 'text-yellow-500', bg: 'bg-yellow-500/10 border-yellow-500/20' },
+    published: { label: 'Published', color: 'text-green-500', bg: 'bg-green-500/10 border-green-500/20' },
+    failed: { label: 'Failed', color: 'text-red-500', bg: 'bg-red-500/10 border-red-500/20' },
+    cancelled: { label: 'Cancelled', color: 'text-gray-500', bg: 'bg-gray-500/10 border-gray-500/20' },
+};
+
+async function loadSchedules() {
+    try {
+        allSchedules = await fetch('/api/schedules').then(r => r.json());
+        renderSchedules(allSchedules);
+    } catch (e) {
+        showToast('Gagal memuat jadwal', 'error');
+    }
+}
+
+function renderSchedules(schedules) {
+    const grid = document.getElementById('schedules-grid');
+
+    if (schedules.length === 0) {
+        grid.innerHTML = '<div class="text-center py-12 text-gray-500">Belum ada jadwal</div>';
+        return;
+    }
+
+    grid.innerHTML = schedules.map(s => {
+        const status = statusConfig[s.status] || statusConfig.scheduled;
+        const dateStr = new Date(s.scheduled_at).toLocaleDateString('id-ID', {
+            year: 'numeric', month: 'short', day: 'numeric',
+            hour: '2-digit', minute: '2-digit',
+        });
+
+        const platformBadges = (s.platforms || []).map(p => {
+            const cfg = platformConfig[p] || { icon: 'fa-circle', color: 'gray', label: p };
+            return `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-medium border border-${cfg.color}-500/20 bg-${cfg.color}-500/5 text-${cfg.color}-600 dark:text-${cfg.color}-400">
+                <i class="fa-brands ${cfg.icon}"></i> ${cfg.label}
+            </span>`;
+        }).join(' ');
+
+        const countdown = s.status === 'scheduled' ? `<span class="countdown-timer text-xs text-gray-400" data-target="${s.scheduled_at}"></span>` : '';
+
+        const errorHtml = s.error ? `<div class="p-2.5 rounded-xl bg-red-500/5 border border-red-500/10 text-xs text-red-500 dark:text-red-400 mt-2">${escapeHtml(s.error)}</div>` : '';
+
+        const resultBadges = s.status === 'published' && s.results ? Object.entries(s.results).map(([p, r]) => {
+            const ok = r.status === 'success';
+            return `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-medium ${ok ? 'bg-green-500/10 text-green-600 dark:text-green-400' : 'bg-red-500/10 text-red-600 dark:text-red-400'}">
+                <i class="fa-solid ${ok ? 'fa-check' : 'fa-xmark'}"></i> ${platformConfig[p]?.label || p}
+            </span>`;
+        }).join(' ') : '';
+
+        const actions = s.status === 'scheduled' ? `
+            <button onclick="editSchedule('${s.id}')" class="p-1.5 rounded-lg hover:bg-primary-500/10 text-primary-600 dark:text-primary-400" title="Edit"><i class="fa-solid fa-pen"></i></button>
+            <button onclick="cancelSchedule('${s.id}')" class="p-1.5 rounded-lg hover:bg-yellow-500/10 text-yellow-600 dark:text-yellow-400" title="Batalkan"><i class="fa-solid fa-ban"></i></button>
+            <button onclick="duplicateSchedule('${s.id}')" class="p-1.5 rounded-lg hover:bg-blue-500/10 text-blue-600 dark:text-blue-400" title="Duplikasi"><i class="fa-solid fa-copy"></i></button>
+            <button onclick="deleteSchedule('${s.id}')" class="p-1.5 rounded-lg hover:bg-red-500/10 text-red-600 dark:text-red-400" title="Hapus"><i class="fa-solid fa-trash"></i></button>
+        ` : s.status === 'failed' ? `
+            <button onclick="retrySchedule('${s.id}')" class="p-1.5 rounded-lg hover:bg-green-500/10 text-green-600 dark:text-green-400" title="Retry"><i class="fa-solid fa-rotate"></i></button>
+            <button onclick="deleteSchedule('${s.id}')" class="p-1.5 rounded-lg hover:bg-red-500/10 text-red-600 dark:text-red-400" title="Hapus"><i class="fa-solid fa-trash"></i></button>
+        ` : `
+            <button onclick="deleteSchedule('${s.id}')" class="p-1.5 rounded-lg hover:bg-red-500/10 text-red-600 dark:text-red-400" title="Hapus"><i class="fa-solid fa-trash"></i></button>
+        `;
+
+        return `<div class="glass rounded-2xl p-5">
+            <div class="flex items-start justify-between gap-4">
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold ${status.bg} ${status.color}">${status.label}</span>
+                        ${countdown}
+                    </div>
+                    <h3 class="font-semibold text-base line-clamp-2" title="${escapeHtml(s.title)}">${escapeHtml(s.title || '(no title)')}</h3>
+                    <p class="text-xs text-gray-500 mt-1">
+                        <i class="fa-regular fa-calendar mr-1"></i>${dateStr}
+                        ${s.timezone ? ` (${s.timezone})` : ''}
+                    </p>
+                    <div class="flex flex-wrap gap-1.5 mt-2">${platformBadges}</div>
+                    ${resultBadges}
+                    ${errorHtml}
+                </div>
+                <div class="flex items-center gap-1 flex-shrink-0">
+                    ${actions}
+                </div>
+            </div>
+        </div>`;
+    }).join('');
+
+    startCountdowns();
+}
+
+function startCountdowns() {
+    setInterval(() => {
+        document.querySelectorAll('.countdown-timer').forEach(el => {
+            const target = new Date(el.dataset.target).getTime();
+            const now = new Date().getTime();
+            const diff = target - now;
+            if (diff <= 0) {
+                el.textContent = 'Now';
+                return;
+            }
+            const h = Math.floor(diff / (1000 * 60 * 60));
+            const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const s = Math.floor((diff % (1000 * 60)) / 1000);
+            el.textContent = `${h}h ${m}m ${s}s`;
+        });
+    }, 1000);
+}
+
+function filterSchedules() {
+    const q = document.getElementById('search-schedules').value.toLowerCase().trim();
+    const platform = document.getElementById('filter-platform').value;
+    const status = document.getElementById('filter-status').value;
+    const dateFrom = document.getElementById('filter-date-from').value;
+    const dateTo = document.getElementById('filter-date-to').value;
+
+    let filtered = allSchedules;
+
+    if (q) filtered = filtered.filter(s => (s.title || '').toLowerCase().includes(q) || (s.description || '').toLowerCase().includes(q));
+    if (platform) filtered = filtered.filter(s => (s.platforms || []).includes(platform));
+    if (status) filtered = filtered.filter(s => s.status === status);
+    if (dateFrom) filtered = filtered.filter(s => s.scheduled_at && s.scheduled_at >= dateFrom);
+    if (dateTo) filtered = filtered.filter(s => s.scheduled_at && s.scheduled_at <= dateTo + 'T23:59:59');
+
+    renderSchedules(filtered);
+}
+
+function editSchedule(id) {
+    const s = allSchedules.find(x => x.id === id);
+    if (!s) return;
+    document.getElementById('edit-id').value = id;
+    document.getElementById('edit-title').value = s.title || '';
+    document.getElementById('edit-description').value = s.description || '';
+    document.getElementById('edit-tags').value = (s.tags || []).join(', ');
+    document.getElementById('edit-visibility').value = s.visibility || 'public';
+
+    const platformsContainer = document.getElementById('edit-platforms');
+    platformsContainer.innerHTML = Object.entries(platformConfig).map(([key, cfg]) => {
+        const checked = (s.platforms || []).includes(key);
+        return `<label class="flex items-center gap-2 p-2 rounded-lg border ${checked ? 'border-primary-500 bg-primary-500/5' : 'border-gray-200 dark:border-gray-700'} cursor-pointer">
+            <input type="checkbox" value="${key}" ${checked ? 'checked' : ''} class="w-4 h-4 rounded border-gray-300 text-primary-600">
+            <span class="text-xs"><i class="fa-brands ${cfg.icon} mr-1"></i>${cfg.label}</span>
+        </label>`;
+    }).join('');
+
+    const dt = s.scheduled_at ? s.scheduled_at.substring(0, 16) : '';
+    document.getElementById('edit-scheduled-at').value = dt;
+
+    document.getElementById('edit-modal').classList.remove('hidden');
+}
+
+function closeEditModal() {
+    document.getElementById('edit-modal').classList.add('hidden');
+}
+
+async function saveEdit() {
+    const id = document.getElementById('edit-id').value;
+    const checkedPlatforms = [...document.querySelectorAll('#edit-platforms input:checked')].map(c => c.value);
+
+    const data = {
+        title: document.getElementById('edit-title').value.trim(),
+        description: document.getElementById('edit-description').value.trim(),
+        tags: document.getElementById('edit-tags').value.split(',').map(t => t.trim()).filter(Boolean),
+        visibility: document.getElementById('edit-visibility').value,
+        platforms: checkedPlatforms,
+        scheduled_at: document.getElementById('edit-scheduled-at').value + ':00',
+    };
+
+    try {
+        const resp = await fetch(`/api/schedules/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+        });
+        const result = await resp.json();
+        if (result.success) {
+            showToast('Jadwal berhasil diupdate', 'success');
+            closeEditModal();
+            loadSchedules();
+        } else {
+            showToast(result.detail || 'Gagal update', 'error');
+        }
+    } catch (e) {
+        showToast('Gagal update jadwal', 'error');
+    }
+}
+
+async function cancelSchedule(id) {
+    showModal('Batalkan Jadwal', 'Yakin ingin membatalkan jadwal ini?', async () => {
+        try {
+            const resp = await fetch(`/api/schedules/${id}/cancel`, { method: 'POST' });
+            const data = await resp.json();
+            if (data.success) {
+                showToast('Jadwal dibatalkan', 'success');
+                loadSchedules();
+            }
+        } catch (e) {
+            showToast('Gagal membatalkan', 'error');
+        }
+    });
+}
+
+async function duplicateSchedule(id) {
+    try {
+        const resp = await fetch(`/api/schedules/${id}/duplicate`, { method: 'POST' });
+        const data = await resp.json();
+        if (data.success) {
+            showToast('Jadwal diduplikasi', 'success');
+            loadSchedules();
+        }
+    } catch (e) {
+        showToast('Gagal duplikasi', 'error');
+    }
+}
+
+async function retrySchedule(id) {
+    try {
+        const resp = await fetch(`/api/schedules/${id}/retry`, { method: 'POST' });
+        const data = await resp.json();
+        if (data.success) {
+            showToast('Retry jadwal dimulai', 'success');
+            loadSchedules();
+        }
+    } catch (e) {
+        showToast('Gagal retry', 'error');
+    }
+}
+
+async function deleteSchedule(id) {
+    showModal('Hapus Jadwal', 'Yakin ingin menghapus jadwal ini?', async () => {
+        try {
+            const resp = await fetch(`/api/schedules/${id}`, { method: 'DELETE' });
+            const data = await resp.json();
+            if (data.success) {
+                showToast('Jadwal dihapus', 'success');
+                loadSchedules();
+            }
+        } catch (e) {
+            showToast('Gagal hapus', 'error');
+        }
+    });
+}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+loadSchedules();
+</script>
+{% endblock %}

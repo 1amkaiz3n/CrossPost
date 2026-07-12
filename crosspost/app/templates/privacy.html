@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block page_title %}Privacy Policy{% endblock %}
+{% block content %}
+<div class="max-w-3xl mx-auto">
+    <div class="glass rounded-2xl p-8">
+        <h1 class="text-2xl font-bold mb-6">Privacy Policy</h1>
+        <p class="text-sm text-gray-500 mb-6">Last updated: July 2026</p>
+
+        <div class="space-y-6 text-sm leading-relaxed">
+            <section>
+                <h2 class="text-lg font-semibold mb-2">1. Introduction</h2>
+                <p>CrossPost is a self-hosted social media publishing platform. This privacy policy explains how your data is collected, used, and protected when you use our service.</p>
+            </section>
+
+            <section>
+                <h2 class="text-lg font-semibold mb-2">2. Data We Collect</h2>
+                <p>When you connect your social media accounts, we collect and store locally on your server:</p>
+                <ul class="list-disc pl-5 mt-2 space-y-1">
+                    <li>OAuth access tokens and refresh tokens</li>
+                    <li>Social media account information (name, profile picture, account ID)</li>
+                    <li>Content you upload for publishing (videos, images, captions)</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2 class="text-lg font-semibold mb-2">3. How We Use Your Data</h2>
+                <p>Your data is used solely for the purpose of:</p>
+                <ul class="list-disc pl-5 mt-2 space-y-1">
+                    <li>Authenticating your social media accounts</li>
+                    <li>Publishing content to your connected social media platforms</li>
+                    <li>Displaying upload history within your dashboard</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2 class="text-lg font-semibold mb-2">4. Data Storage</h2>
+                <p>All data is stored locally on your own server using JSON files. We do not send your data to any third-party servers except the social media platforms you explicitly authorize. No data is shared with CrossPost developers or any other party.</p>
+            </section>
+
+            <section>
+                <h2 class="text-lg font-semibold mb-2">5. Data Retention</h2>
+                <p>You have full control over your data. You can disconnect accounts and delete upload history directly from the dashboard at any time. All data is removed when you disconnect an account or delete your uploads.</p>
+            </section>
+
+            <section>
+                <h2 class="text-lg font-semibold mb-2">6. Third-Party Services</h2>
+                <p>CrossPost interacts with the following third-party services through their official APIs:</p>
+                <ul class="list-disc pl-5 mt-2 space-y-1">
+                    <li>Google (YouTube)</li>
+                    <li>Meta (Facebook, Instagram, Threads)</li>
+                    <li>LinkedIn</li>
+                </ul>
+                <p class="mt-2">Each service has its own privacy policy and terms of service. Please review them separately.</p>
+            </section>
+
+            <section>
+                <h2 class="text-lg font-semibold mb-2">7. Security</h2>
+                <p>Since CrossPost is self-hosted, security depends on your own server configuration. We recommend using HTTPS in production and keeping your server credentials secure. OAuth tokens are stored locally and are never exposed to unauthorized parties.</p>
+            </section>
+
+            <section>
+                <h2 class="text-lg font-semibold mb-2">8. User Rights</h2>
+                <p>As a self-hosted user, you have complete control over your data:</p>
+                <ul class="list-disc pl-5 mt-2 space-y-1">
+                    <li>Access all stored data through the dashboard</li>
+                    <li>Delete any or all data at any time</li>
+                    <li>Disconnect accounts to remove associated tokens</li>
+                    <li>Export data via the backup feature</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2 class="text-lg font-semibold mb-2">9. Changes to This Policy</h2>
+                <p>We may update this privacy policy from time to time. Any changes will be reflected on this page.</p>
+            </section>
+
+            <section>
+                <h2 class="text-lg font-semibold mb-2">10. Contact</h2>
+                <p>If you have any questions about this privacy policy, please contact the administrator of this CrossPost instance.</p>
+            </section>
+        </div>
+    </div>
+</div>
+{% endblock %}

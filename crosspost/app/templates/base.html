@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CrossPost - Self-Hosted Social Media Publisher</title>
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script>
+        // Prevent flash - set theme before anything renders
+        const theme = localStorage.getItem('theme') || 'dark';
+        document.documentElement.classList.remove('dark', 'light');
+        document.documentElement.classList.add(theme);
+    </script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: { 50: '#eef2ff', 100: '#e0e7ff', 200: '#c7d2fe', 300: '#a5b4fc', 400: '#818cf8', 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca', 800: '#3730a3', 900: '#312e81', 950: '#1e1b4b' },
+                    },
+                    fontFamily: { sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'] },
+                    animation: {
+                        'fade-in': 'fadeIn 0.3s ease-out',
+                        'slide-up': 'slideUp 0.3s ease-out',
+                        'scale-in': 'scaleIn 0.2s ease-out',
+                    },
+                    keyframes: {
+                        fadeIn: { '0%': { opacity: '0', transform: 'translateY(8px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
+                        slideUp: { '0%': { opacity: '0', transform: 'translateY(12px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
+                        scaleIn: { '0%': { opacity: '0', transform: 'scale(0.95)' }, '100%': { opacity: '1', transform: 'scale(1)' } },
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+        .sidebar-link { transition: all 0.2s ease; white-space: nowrap; }
+        .sidebar-link:hover { background: rgba(99,102,241,0.06); }
+        .dark .sidebar-link:hover { background: rgba(99,102,241,0.12); }
+        .sidebar-collapsed aside#sidebar { width: 72px; }
+        .sidebar-collapsed aside#sidebar .logo-text,
+        .sidebar-collapsed aside#sidebar .link-text { display: none; }
+        .sidebar-collapsed aside#sidebar .sidebar-link { justify-content: center; padding-left: 0; padding-right: 0; }
+        .sidebar-collapsed aside#sidebar .logo-container { justify-content: center; padding-left: 0; padding-right: 0; }
+        .toast { animation: toastSlideIn 0.35s cubic-bezier(0.16,1,0.3,1), toastFadeOut 0.3s ease 3.7s forwards; }
+        @keyframes toastSlideIn { from { transform: translateX(120%) scale(0.9); opacity: 0; } to { transform: translateX(0) scale(1); opacity: 1; } }
+        @keyframes toastFadeOut { to { transform: translateX(120%); opacity: 0; } }
+        .loading-spinner { border: 3px solid rgba(99,102,241,0.15); border-top-color: #6366f1; border-radius: 50%; width: 24px; height: 24px; animation: spin 0.7s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(99,102,241,0.2); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(99,102,241,0.35); }
+        .modal-content { animation: scaleIn 0.25s cubic-bezier(0.16,1,0.3,1); }
+    </style>
+</head>
+<body class="bg-[#f5f6fa] dark:bg-gray-950 text-gray-900 dark:text-gray-100 min-h-screen">
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="fixed inset-y-0 left-0 z-30 w-64 bg-white dark:bg-gray-900 border-r border-gray-200/80 dark:border-gray-800/80 transform -translate-x-full lg:translate-x-0 transition-all duration-200 ease-in-out lg:static lg:inset-auto flex-shrink-0 flex flex-col">
+            <div class="logo-container flex items-center gap-3 px-5 py-5 border-b border-gray-100 dark:border-gray-800">
+                <img src="/static/favicon.svg" alt="CrossPost" class="w-8 h-8 rounded-lg flex-shrink-0">
+                <span class="logo-text text-lg font-bold text-gray-800 dark:text-white">CrossPost</span>
+            </div>
+            
+            <nav class="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
+                <p class="px-3 pb-2 text-[11px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Main Menu</p>
+                <a href="/dashboard" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium {% if active == 'dashboard' %}bg-primary-500/10 text-primary-600 dark:text-primary-400{% else %}text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200{% endif %}">
+                    <i class="fa-solid fa-chart-pie w-5 h-5 flex items-center justify-center text-base"></i>
+                    <span class="link-text">Dashboard</span>
+                </a>
+                <a href="/contents" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium {% if active == 'contents' %}bg-primary-500/10 text-primary-600 dark:text-primary-400{% else %}text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200{% endif %}">
+                    <i class="fa-solid fa-cubes w-5 h-5 flex items-center justify-center text-base"></i>
+                    <span class="link-text">Contents</span>
+                </a>
+                <a href="/analytics" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium {% if active == 'analytics' %}bg-primary-500/10 text-primary-600 dark:text-primary-400{% else %}text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200{% endif %}">
+                    <i class="fa-solid fa-chart-simple w-5 h-5 flex items-center justify-center text-base"></i>
+                    <span class="link-text">Analytics</span>
+                </a>
+                <a href="/upload" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium {% if active == 'upload' %}bg-primary-500/10 text-primary-600 dark:text-primary-400{% else %}text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200{% endif %}">
+                    <i class="fa-solid fa-cloud-arrow-up w-5 h-5 flex items-center justify-center text-base"></i>
+                    <span class="link-text">Upload</span>
+                </a>
+                <a href="/history" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium {% if active == 'history' %}bg-primary-500/10 text-primary-600 dark:text-primary-400{% else %}text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200{% endif %}">
+                    <i class="fa-solid fa-clock-rotate-left w-5 h-5 flex items-center justify-center text-base"></i>
+                    <span class="link-text">History</span>
+                </a>
+                <a href="/scheduled" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium {% if active == 'scheduled' %}bg-primary-500/10 text-primary-600 dark:text-primary-400{% else %}text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200{% endif %}">
+                    <i class="fa-solid fa-calendar-clock w-5 h-5 flex items-center justify-center text-base"></i>
+                    <span class="link-text">Scheduled</span>
+                </a>
+                
+                <p class="px-3 pt-4 pb-2 text-[11px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Settings</p>
+                <a href="/accounts" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium {% if active == 'accounts' %}bg-primary-500/10 text-primary-600 dark:text-primary-400{% else %}text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200{% endif %}">
+                    <i class="fa-solid fa-users w-5 h-5 flex items-center justify-center text-base"></i>
+                    <span class="link-text">Accounts</span>
+                </a>
+                <a href="/settings" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium {% if active == 'settings' %}bg-primary-500/10 text-primary-600 dark:text-primary-400{% else %}text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200{% endif %}">
+                    <i class="fa-solid fa-gear w-5 h-5 flex items-center justify-center text-base"></i>
+                    <span class="link-text">Settings</span>
+                </a>
+            </nav>
+
+            <div class="px-3 py-4 border-t border-gray-100 dark:border-gray-800">
+                <div class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-gray-50 dark:bg-gray-800">
+                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-primary-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">A</div>
+                    <div class="min-w-0 flex-1">
+                        <p class="text-sm font-medium text-gray-800 dark:text-white truncate">Admin User</p>
+                        <p class="text-xs text-gray-500 truncate">admin@crosspost.app</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <div id="sidebar-overlay" class="fixed inset-0 bg-black/30 dark:bg-black/50 z-20 hidden lg:hidden" onclick="toggleSidebarMobile()"></div>
+
+        <div class="flex-1 flex flex-col min-w-0">
+            <header class="bg-white dark:bg-gray-900 border-b border-gray-200/80 dark:border-gray-800/80 sticky top-0 z-10">
+                <div class="flex items-center justify-between px-4 lg:px-6 py-3">
+                    <div class="flex items-center gap-3">
+                        <button onclick="toggleSidebarMobile()" class="lg:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400">
+                            <i class="fa-solid fa-bars text-lg"></i>
+                        </button>
+                        <button onclick="toggleSidebarDesktop()" class="hidden lg:flex p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400 transition-colors">
+                            <i class="fa-solid fa-bars-staggered text-lg"></i>
+                        </button>
+                        <h1 class="text-lg font-semibold text-gray-800 dark:text-white">{% block page_title %}{% endblock %}</h1>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="toggleTheme()" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400 transition-colors" title="Toggle theme">
+                            <i id="theme-icon-dark" class="fa-solid fa-sun hidden dark:block text-lg"></i>
+                            <i id="theme-icon-light" class="fa-solid fa-moon dark:hidden text-lg"></i>
+                        </button>
+                        <button class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400 transition-colors">
+                            <i class="fa-solid fa-bell text-lg"></i>
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <main class="flex-1 overflow-y-auto p-4 lg:p-6">
+                {% block content %}{% endblock %}
+            </main>
+        </div>
+    </div>
+
+    <div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2 pointer-events-none"></div>
+
+    <div id="modal-backdrop" class="fixed inset-0 bg-black/30 dark:bg-black/50 z-40 hidden" onclick="closeModal()"></div>
+    <div id="modal" class="fixed inset-0 z-50 flex items-center justify-center hidden p-4">
+        <div class="modal-content bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-md w-full mx-auto shadow-xl border border-gray-200 dark:border-gray-700">
+            <h3 id="modal-title" class="text-lg font-semibold text-gray-900 dark:text-white mb-2"></h3>
+            <p id="modal-message" class="text-sm text-gray-500 dark:text-gray-400 mb-6"></p>
+            <div class="flex gap-3 justify-end">
+                <button onclick="closeModal()" class="px-4 py-2 rounded-lg text-sm font-medium bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-gray-700 dark:text-gray-200">Batal</button>
+                <button id="modal-confirm-btn" class="px-4 py-2 rounded-lg text-sm font-medium bg-red-600 hover:bg-red-700 text-white transition-colors">Hapus</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleTheme() {
+            const html = document.documentElement;
+            html.classList.toggle('dark');
+            localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
+            fetch('/api/settings', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({theme: html.classList.contains('dark') ? 'dark' : 'light'})
+            }).catch(() => {});
+        }
+        function toggleSidebarMobile() {
+            document.getElementById('sidebar').classList.toggle('-translate-x-full');
+            document.getElementById('sidebar-overlay').classList.toggle('hidden');
+        }
+        function toggleSidebarDesktop() {
+            document.body.classList.toggle('sidebar-collapsed');
+            localStorage.setItem('sidebar-collapsed', document.body.classList.contains('sidebar-collapsed') ? 'true' : 'false');
+        }
+        const isSidebarCollapsed = localStorage.getItem('sidebar-collapsed') === 'true';
+        if (isSidebarCollapsed) document.body.classList.add('sidebar-collapsed');
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const config = {
+                success: { bg: 'bg-green-600', icon: '<i class="fa-solid fa-check-circle"></i>' },
+                error: { bg: 'bg-red-600', icon: '<i class="fa-solid fa-circle-xmark"></i>' },
+                warning: { bg: 'bg-yellow-600', icon: '<i class="fa-solid fa-triangle-exclamation"></i>' },
+                info: { bg: 'bg-primary-600', icon: '<i class="fa-solid fa-circle-info"></i>' }
+            };
+            const c = config[type] || config.info;
+            const toast = document.createElement('div');
+            toast.className = `toast pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-lg text-white text-sm font-medium shadow-lg ${c.bg}`;
+            toast.innerHTML = `${c.icon} <span>${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 4000);
+        }
+
+        function showModal(title, message, onConfirm) {
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-message').textContent = message;
+            document.getElementById('modal-backdrop').classList.remove('hidden');
+            document.getElementById('modal').classList.remove('hidden');
+            document.getElementById('modal-confirm-btn').onclick = () => { closeModal(); if (onConfirm) onConfirm(); };
+        }
+
+        function closeModal() {
+            document.getElementById('modal-backdrop').classList.add('hidden');
+            document.getElementById('modal').classList.add('hidden');
+        }
+
+        // Toast from URL params
+        const urlParams = new URLSearchParams(window.location.search);
+        const successMsgs = {
+            'youtube_connected': 'Akun YouTube berhasil dihubungkan!',
+            'meta_connected': 'Akun Facebook & Instagram berhasil dihubungkan!',
+            'linkedin_connected': 'Akun LinkedIn berhasil dihubungkan!',
+            'threads_connected': 'Akun Threads berhasil dihubungkan!',
+        };
+        const errorMsgs = {
+            'youtube_auth_failed': 'Gagal menghubungkan YouTube',
+            'meta_auth_failed': 'Gagal menghubungkan Meta',
+            'linkedin_auth_failed': 'Gagal menghubungkan LinkedIn',
+            'threads_auth_failed': 'Gagal menghubungkan Threads',
+            'token_exchange_failed': 'Gagal menukarkan token',
+            'invalid_state': 'State tidak valid',
+            'no_channel': 'Tidak ditemukan channel YouTube',
+            'no_pages': 'Tidak ditemukan halaman Facebook',
+            'no_profile': 'Tidak ditemukan profil',
+        };
+        if (urlParams.get('success') && successMsgs[urlParams.get('success')]) showToast(successMsgs[urlParams.get('success')], 'success');
+        if (urlParams.get('error') && errorMsgs[urlParams.get('error')]) showToast(errorMsgs[urlParams.get('error')], 'error');
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

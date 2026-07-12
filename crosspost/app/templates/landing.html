@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CrossPost - Auto-Publish ke Semua Platform Sosial Media</title>
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            200: '#c7d2fe',
+                            300: '#a5b4fc',
+                            400: '#818cf8',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            800: '#3730a3',
+                            900: '#312e81',
+                            950: '#1e1b4b',
+                        }
+                    },
+                    backdropBlur: {
+                        xs: '2px',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+        .glass { background: rgba(255,255,255,0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
+        .dark .glass { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(99,102,241,0.3); border-radius: 3px; }
+    </style>
+</head>
+<body class="bg-gradient-to-b from-gray-50 to-white dark:from-gray-950 dark:to-gray-900 min-h-screen">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-32 relative z-10">
+        <div class="text-center max-w-4xl mx-auto">
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-500/10 border border-primary-500/20 mb-8">
+                <span class="flex h-2 w-2 rounded-full bg-primary-500 animate-pulse"></span>
+                <span class="text-sm font-medium text-primary-600 dark:text-primary-400">CrossPost v1.0.0</span>
+            </div>
+            <h1 class="text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight mb-8">
+                <span class="block text-gray-900 dark:text-white">Publish Konten ke Semua</span>
+                <span class="block bg-gradient-to-r from-primary-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">Platform Sosial Media</span>
+            </h1>
+            <p class="text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-10 max-w-2xl mx-auto">
+                Self-hosted dashboard untuk auto-publish video, gambar, dan postingan ke YouTube, Facebook, Instagram, LinkedIn, dan Threads.
+            </p>
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <a href="/login" class="w-full sm:w-auto px-8 py-4 rounded-xl bg-gradient-to-r from-primary-600 to-purple-600 hover:from-primary-700 hover:to-purple-700 text-white font-semibold text-lg shadow-xl shadow-primary-500/30 transition-all transform hover:scale-105">Mulai Sekarang</a>
+                <a href="#features" class="w-full sm:w-auto px-8 py-4 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 font-semibold text-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-all">Pelajari Lebih Lanjut</a>
+            </div>
+        </div>
+    </div>
+    <div id="features" class="py-20 bg-white dark:bg-gray-900">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">Semua Fitur yang Anda Butuhkan</h2>
+                <p class="text-lg text-gray-600 dark:text-gray-400">CrossPost memberikan kontrol penuh atas konten sosial media Anda</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="group p-8 rounded-2xl bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 hover:border-primary-500 dark:hover:border-primary-500 transition-all duration-300">
+                    <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-primary-500 to-purple-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform"><i class="fa-brands fa-youtube text-white text-2xl"></i></div>
+                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">YouTube Auto-Upload</h3>
+                    <p class="text-gray-600 dark:text-gray-400">Upload video secara otomatis ke channel YouTube Anda dengan metadata yang customizable.</p>
+                </div>
+                <div class="group p-8 rounded-2xl bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 hover:border-primary-500 dark:hover:border-primary-500 transition-all duration-300">
+                    <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-primary-500 to-purple-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform"><i class="fa-brands fa-facebook text-white text-2xl"></i></div>
+                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">Facebook Publishing</h3>
+                    <p class="text-gray-600 dark:text-gray-400">Publikasikan foto dan video langsung ke halaman Facebook dengan cepat dan mudah.</p>
+                </div>
+                <div class="group p-8 rounded-2xl bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 hover:border-primary-500 dark:hover:border-primary-500 transition-all duration-300">
+                    <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-primary-500 to-purple-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform"><i class="fa-brands fa-instagram text-white text-2xl"></i></div>
+                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">Instagram & Reels</h3>
+                    <p class="text-gray-600 dark:text-gray-400">Share foto dan video ke Instagram Feed dan Reels dengan caption otomatis.</p>
+                </div>
+                <div class="group p-8 rounded-2xl bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 hover:border-primary-500 dark:hover:border-primary-500 transition-all duration-300">
+                    <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-primary-500 to-purple-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform"><i class="fa-brands fa-linkedin text-white text-2xl"></i></div>
+                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">LinkedIn Professional</h3>
+                    <p class="text-gray-600 dark:text-gray-400">Bangun personal brand Anda dengan auto-post ke LinkedIn profesional.</p>
+                </div>
+                <div class="group p-8 rounded-2xl bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 hover:border-primary-500 dark:hover:border-primary-500 transition-all duration-300">
+                    <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-primary-500 to-purple-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform"><i class="fa-brands fa-threads text-white text-2xl"></i></div>
+                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">Threads Integration</h3>
+                    <p class="text-gray-600 dark:text-gray-400">Sync postingan ke Threads dengan cepat menggunakan template yang Anda buat.</p>
+                </div>
+                <div class="group p-8 rounded-2xl bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 hover:border-primary-500 dark:hover:border-primary-500 transition-all duration-300">
+                    <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-primary-500 to-purple-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform"><i class="fa-solid fa-cog text-white text-2xl"></i></div>
+                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">Template & Automation</h3>
+                    <p class="text-gray-600 dark:text-gray-400">Simpan template deskripsi dan tags untuk setiap platform agar postingan selalu konsisten.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="py-20 bg-gradient-to-r from-primary-600 via-purple-600 to-pink-600">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+                <div class="space-y-2"><div class="text-4xl md:text-5xl font-extrabold text-white">500+</div><div class="text-primary-100 font-medium text-lg">Aktif User</div></div>
+                <div class="space-y-2"><div class="text-4xl md:text-5xl font-extrabold text-white">10K+</div><div class="text-primary-100 font-medium text-lg">Posts Terbit</div></div>
+                <div class="space-y-2"><div class="text-4xl md:text-5xl font-extrabold text-white">5</div><div class="text-primary-100 font-medium text-lg">Platform</div></div>
+                <div class="space-y-2"><div class="text-4xl md:text-5xl font-extrabold text-white">100%</div><div class="text-primary-100 font-medium text-lg">Self-Hosted</div></div>
+            </div>
+        </div>
+    </div>
+    <div class="py-24 bg-white dark:bg-gray-900">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-6">Siap untuk Mengotomatiskan Konten Anda?</h2>
+            <p class="text-xl text-gray-600 dark:text-gray-400 mb-10">Join ribuan pengguna yang telah mengoptimalkan waktu mereka dengan CrossPost.</p>
+            <a href="/login" class="inline-flex items-center justify-center px-8 py-4 rounded-xl bg-gradient-to-r from-primary-600 to-purple-600 hover:from-primary-700 hover:to-purple-700 text-white font-semibold text-lg shadow-xl shadow-primary-500/30 transition-all transform hover:scale-105">Mulai Publikasi Sekarang <svg class="ml-3 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></a>
+        </div>
+    </div>
+    <footer class="bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 py-8">
+        <div class="max-w-7xl mx-auto px-4 text-center text-gray-500 dark:text-gray-400 text-sm"><p>© 2026 CrossPost. All rights reserved.</p></div>
+    </footer>
+</body>
+</html>

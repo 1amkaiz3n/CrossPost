@@ -1,0 +1,286 @@
+{% extends "base.html" %}
+{% block page_title %}Analytics{% endblock %}
+{% block content %}
+<div class="space-y-5 animate-fade-in">
+    <!-- Summary Cards -->
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3">
+        <div class="bg-white dark:bg-gray-800/80 rounded-xl p-4 border border-gray-200/60 dark:border-gray-700/60">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Posts</span>
+                <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center shadow-sm"><i class="fa-solid fa-cubes text-white text-xs"></i></div>
+            </div>
+            <div class="text-xl font-bold text-gray-900 dark:text-white" id="stat-total-posts">0</div>
+        </div>
+        <div class="bg-white dark:bg-gray-800/80 rounded-xl p-4 border border-gray-200/60 dark:border-gray-700/60">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Views</span>
+                <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-sm"><i class="fa-regular fa-eye text-white text-xs"></i></div>
+            </div>
+            <div class="text-xl font-bold text-gray-900 dark:text-white" id="stat-total-views">0</div>
+        </div>
+        <div class="bg-white dark:bg-gray-800/80 rounded-xl p-4 border border-gray-200/60 dark:border-gray-700/60">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Likes</span>
+                <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-pink-500 to-pink-600 flex items-center justify-center shadow-sm"><i class="fa-regular fa-thumbs-up text-white text-xs"></i></div>
+            </div>
+            <div class="text-xl font-bold text-gray-900 dark:text-white" id="stat-total-likes">0</div>
+        </div>
+        <div class="bg-white dark:bg-gray-800/80 rounded-xl p-4 border border-gray-200/60 dark:border-gray-700/60">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Comments</span>
+                <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center shadow-sm"><i class="fa-regular fa-comment text-white text-xs"></i></div>
+            </div>
+            <div class="text-xl font-bold text-gray-900 dark:text-white" id="stat-total-comments">0</div>
+        </div>
+        <div class="bg-white dark:bg-gray-800/80 rounded-xl p-4 border border-gray-200/60 dark:border-gray-700/60">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Engagement</span>
+                <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center shadow-sm"><i class="fa-solid fa-chart-line text-white text-xs"></i></div>
+            </div>
+            <div class="text-xl font-bold text-gray-900 dark:text-white" id="stat-total-engagement">0</div>
+        </div>
+        <div class="bg-white dark:bg-gray-800/80 rounded-xl p-4 border border-gray-200/60 dark:border-gray-700/60">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Subscribers</span>
+                <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center shadow-sm"><i class="fa-solid fa-users text-white text-xs"></i></div>
+            </div>
+            <div class="text-xl font-bold text-gray-900 dark:text-white" id="stat-total-subscribers">0</div>
+        </div>
+        <div class="bg-white dark:bg-gray-800/80 rounded-xl p-4 border border-gray-200/60 dark:border-gray-700/60">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Followers</span>
+                <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-cyan-500 to-cyan-600 flex items-center justify-center shadow-sm"><i class="fa-solid fa-user-plus text-white text-xs"></i></div>
+            </div>
+            <div class="text-xl font-bold text-gray-900 dark:text-white" id="stat-total-followers">0</div>
+        </div>
+    </div>
+
+    <!-- Platform Breakdown Cards -->
+    <div id="platform-breakdown" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+        <div class="col-span-full text-center py-8 text-sm text-gray-400">Memuat data...</div>
+    </div>
+
+    <!-- Best Time to Post -->
+    <div class="bg-white dark:bg-gray-800/80 rounded-xl border border-gray-200/60 dark:border-gray-700/60 p-5">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-sm font-semibold text-gray-800 dark:text-white">Best Time to Post</h2>
+            <button onclick="loadBestTime()" class="text-xs px-3 py-1.5 rounded-lg bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 hover:bg-primary-100 dark:hover:bg-primary-800/30"><i class="fa-solid fa-rotate"></i></button>
+        </div>
+        <div id="best-time-container" class="text-center py-8 text-sm text-gray-400">Memuat data...</div>
+    </div>
+
+    <!-- Top Performing Content -->
+    <div class="bg-white dark:bg-gray-800/80 rounded-xl border border-gray-200/60 dark:border-gray-700/60 p-5">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-sm font-semibold text-gray-800 dark:text-white">Top Performing Content</h2>
+            <select id="sort-by" onchange="loadTopContent()" class="text-xs px-2 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300">
+                <option value="views">By Views</option>
+                <option value="likes">By Likes</option>
+                <option value="comments">By Comments</option>
+                <option value="engagement">By Engagement</option>
+            </select>
+        </div>
+        <div id="top-content-container" class="space-y-2">
+            <div class="text-center py-8 text-sm text-gray-400">Memuat data...</div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+const platformCfg = {
+    youtube: { icon: 'fa-youtube', color: '#EF4444', bg: 'from-red-500 to-red-600', label: 'YouTube' },
+    facebook: { icon: 'fa-facebook', color: '#2563EB', bg: 'from-blue-500 to-blue-600', label: 'Facebook' },
+    instagram: { icon: 'fa-instagram', color: '#DB2777', bg: 'from-pink-500 to-pink-600', label: 'Instagram' },
+    linkedin: { icon: 'fa-linkedin', color: '#1D4ED8', bg: 'from-blue-700 to-blue-800', label: 'LinkedIn' },
+    threads: { icon: 'fa-threads', color: '#6B7280', bg: 'from-gray-500 to-gray-600', label: 'Threads' }
+};
+
+function fmt(n) {
+    if (n === null || n === undefined) return '0';
+    n = Number(n);
+    if (n >= 1e6) return (n / 1e6).toFixed(1) + 'M';
+    if (n >= 1e3) return (n / 1e3).toFixed(1) + 'K';
+    return n.toString();
+}
+
+async function loadSummary() {
+    try {
+        const r = await fetch('/api/stats/summary');
+        const d = await r.json();
+        document.getElementById('stat-total-posts').textContent = fmt(d.total_posts);
+        document.getElementById('stat-total-views').textContent = fmt(d.total_views);
+        document.getElementById('stat-total-likes').textContent = fmt(d.total_likes);
+        document.getElementById('stat-total-comments').textContent = fmt(d.total_comments);
+        document.getElementById('stat-total-engagement').textContent = fmt(d.total_engagement);
+        document.getElementById('stat-total-subscribers').textContent = fmt(d.total_subscribers);
+        document.getElementById('stat-total-followers').textContent = fmt(d.total_followers);
+    } catch (e) { console.error(e); }
+}
+
+async function loadPlatforms() {
+    try {
+        const r = await fetch('/api/stats/platforms');
+        const data = await r.json();
+        const el = document.getElementById('platform-breakdown');
+        if (!data.length) {
+            el.innerHTML = '<div class="col-span-full text-center py-8 text-sm text-gray-400">Belum ada data</div>';
+            return;
+        }
+        el.innerHTML = data.map(p => {
+            const cfg = platformCfg[p.platform] || { icon: 'fa-circle', color: '#6B7280', bg: 'from-gray-500 to-gray-600', label: p.platform };
+            const engRate = p.views > 0 ? ((p.total_engagement / p.views) * 100).toFixed(1) : '0.0';
+            const isYt = p.platform === 'youtube';
+            return `
+            <div class="bg-white dark:bg-gray-800/80 rounded-xl border border-gray-200/60 dark:border-gray-700/60 overflow-hidden hover:shadow-md transition-all" data-platform="${p.platform}">
+                <div class="p-4 flex items-center gap-3 border-b border-gray-100 dark:border-gray-700/50">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br ${cfg.bg} flex items-center justify-center shadow-sm">
+                        <i class="fa-brands ${cfg.icon} text-white text-sm"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-semibold text-gray-800 dark:text-white">${cfg.label} ${isYt ? '<span class="text-[10px] font-medium text-green-500 bg-green-500/10 px-1.5 py-0.5 rounded ml-1">LIVE</span>' : ''}</p>
+                        <p class="text-xs text-gray-500">${p.posts} posts &middot; ${engRate}% engagement rate</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-4 divide-x divide-gray-100 dark:divide-gray-700/50">
+                    <div class="p-3 text-center">
+                        <p class="text-lg font-bold text-gray-900 dark:text-white" data-yt="views">${fmt(p.views)}</p>
+                        <p class="text-[10px] text-gray-400 uppercase tracking-wider">Views</p>
+                    </div>
+                    <div class="p-3 text-center">
+                        <p class="text-lg font-bold text-gray-900 dark:text-white" data-yt="likes">${fmt(p.likes)}</p>
+                        <p class="text-[10px] text-gray-400 uppercase tracking-wider">Likes</p>
+                    </div>
+                    <div class="p-3 text-center">
+                        <p class="text-lg font-bold text-gray-900 dark:text-white" data-yt="comments">${fmt(p.comments)}</p>
+                        <p class="text-[10px] text-gray-400 uppercase tracking-wider">Comments</p>
+                    </div>
+                    <div class="p-3 text-center">
+                        <p class="text-lg font-bold ${isYt ? 'text-green-600 dark:text-green-400' : 'text-cyan-600 dark:text-cyan-400'}" data-yt="subscribers">${isYt ? fmt(p.subscribers) : fmt(p.followers)}</p>
+                        <p class="text-[10px] text-gray-400 uppercase tracking-wider">${isYt ? 'Subscribers' : 'Followers'}</p>
+                    </div>
+                </div>
+            </div>`;
+        }).join('');
+        refreshYoutubeRealtime();
+    } catch (e) { console.error(e); }
+}
+
+async function refreshYoutubeRealtime() {
+    try {
+        const r = await fetch('/api/stats/youtube/realtime');
+        const d = await r.json();
+        const card = document.querySelector('[data-platform="youtube"]');
+        if (!card) return;
+
+        const sumLikes = d.videos.reduce((s, v) => s + v.likes, 0);
+        const sumComments = d.videos.reduce((s, v) => s + v.comments, 0);
+
+        card.querySelector('[data-yt="views"]').textContent = fmt(d.channel.total_channel_views);
+        card.querySelector('[data-yt="likes"]').textContent = fmt(sumLikes);
+        card.querySelector('[data-yt="comments"]').textContent = fmt(sumComments);
+        card.querySelector('[data-yt="subscribers"]').textContent = fmt(d.channel.subscribers);
+
+        document.getElementById('stat-total-subscribers').textContent = fmt(d.channel.subscribers);
+    } catch (e) { console.error('YouTube realtime fetch error:', e); }
+}
+
+async function loadBestTime() {
+    try {
+        const r = await fetch('/api/stats/best-time');
+        const d = await r.json();
+        const el = document.getElementById('best-time-container');
+        if (!d.hour_ranking || !d.hour_ranking.length) {
+            el.innerHTML = '<p class="text-gray-400 text-sm">Belum cukup data.</p>';
+            return;
+        }
+        el.innerHTML = `
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+            <div class="rounded-xl bg-gradient-to-br from-primary-500 to-purple-600 p-5 text-white text-center">
+                <p class="text-xs font-medium uppercase tracking-wider opacity-80 mb-1">Best Hour</p>
+                <p class="text-3xl font-bold">${d.best_hour.label}</p>
+                <p class="text-sm mt-1 opacity-90">Rata-rata ${d.best_hour.avg_engagement} engagement/post</p>
+            </div>
+            <div class="rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 p-5 text-white text-center">
+                <p class="text-xs font-medium uppercase tracking-wider opacity-80 mb-1">Best Day</p>
+                <p class="text-3xl font-bold">${d.best_day.label}</p>
+                <p class="text-sm mt-1 opacity-90">Rata-rata ${d.best_day.avg_engagement} engagement/post</p>
+            </div>
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 mb-4">
+            ${d.day_ranking.map(dd => `
+                <div class="rounded-lg border border-gray-100 dark:border-gray-700/50 p-3 text-center">
+                    <p class="text-xs font-medium text-gray-500 dark:text-gray-400">${dd.day_label}</p>
+                    <p class="text-lg font-bold text-gray-900 dark:text-white">${dd.avg_engagement}</p>
+                    <p class="text-[10px] text-gray-400">avg eng.</p>
+                </div>
+            `).join('')}
+        </div>
+        <div>
+            <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2 text-center">Best Hours Ranking</p>
+            <div class="grid grid-cols-5 sm:grid-cols-10 gap-2">
+                ${d.hour_ranking.map(h => `
+                    <div class="rounded-lg bg-primary-50 dark:bg-primary-900/20 p-2 text-center">
+                        <p class="text-xs font-bold text-primary-600 dark:text-primary-400">${h.hour}:00</p>
+                        <p class="text-[10px] text-gray-500">${h.avg_engagement}</p>
+                    </div>
+                `).join('')}
+            </div>
+        </div>`;
+    } catch (e) { console.error(e); }
+}
+
+async function loadTopContent() {
+    const sortBy = document.getElementById('sort-by').value;
+    try {
+        const r = await fetch('/api/contents');
+        const all = await r.json();
+        const el = document.getElementById('top-content-container');
+
+        if (!all.length) {
+            el.innerHTML = '<div class="text-center py-8 text-sm text-gray-400">Belum ada konten</div>';
+            return;
+        }
+
+        const getVal = c => sortBy === 'engagement' ? ((c.likes || 0) + (c.comments || 0)) : (c[sortBy] || 0);
+        const grouped = {};
+        for (const c of all) {
+            if (!grouped[c.platform]) grouped[c.platform] = [];
+            grouped[c.platform].push(c);
+        }
+
+        let html = '';
+        let rank = 1;
+        for (const [platform, items] of Object.entries(grouped)) {
+            const cfg = platformCfg[platform] || { icon: 'fa-circle', color: '#6B7280', label: platform };
+            const top = items.sort((a, b) => getVal(b) - getVal(a)).slice(0, 5);
+            html += `<div class="mb-3 flex items-center gap-2"><i class="fa-brands ${cfg.icon}" style="color:${cfg.color}"></i><span class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">${cfg.label}</span></div>`;
+            html += top.map(c => {
+                const eng = (c.likes || 0) + (c.comments || 0);
+                return `
+            <div class="flex items-center gap-3 p-3 rounded-lg border border-gray-100 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
+                <span class="w-6 text-center text-xs font-bold text-gray-400">${rank++}</span>
+                <i class="fa-brands ${cfg.icon}" style="color:${cfg.color};width:16px;text-align:center"></i>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium text-gray-800 dark:text-white truncate">${c.title || '(no title)'}</p>
+                    <p class="text-xs text-gray-400 truncate">${c.published_at ? new Date(c.published_at).toLocaleDateString('id-ID') : ''}</p>
+                </div>
+                <div class="flex items-center gap-3 text-xs text-gray-500">
+                    <span><i class="fa-regular fa-eye text-blue-500"></i> ${fmt(c.views)}</span>
+                    <span><i class="fa-regular fa-thumbs-up text-pink-500"></i> ${fmt(c.likes)}</span>
+                    <span><i class="fa-regular fa-comment text-amber-500"></i> ${fmt(c.comments)}</span>
+                    <span class="font-semibold text-primary-600 dark:text-primary-400">${fmt(eng)}</span>
+                </div>
+            </div>`;
+            }).join('');
+        }
+        el.innerHTML = html;
+    } catch (e) { console.error(e); }
+}
+
+loadSummary();
+loadPlatforms();
+loadBestTime();
+loadTopContent();
+</script>
+{% endblock %}

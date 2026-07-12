@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+{% block page_title %}Connected Accounts{% endblock %}
+{% block content %}
+<div class="space-y-6">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div class="glass rounded-2xl p-6">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <div class="flex items-center gap-2 mb-2">
+                        <div class="w-8 h-8 bg-red-500/10 rounded-lg flex items-center justify-center">
+                            <i class="fa-brands fa-youtube text-red-600 dark:text-red-400 text-lg"></i>
+                        </div>
+                        <h3 class="font-semibold">YouTube</h3>
+                    </div>
+                </div>
+                <div id="youtube-status" class="text-sm"></div>
+            </div>
+            <div id="youtube-info" class="mb-4"></div>
+            <div id="youtube-actions"></div>
+        </div>
+
+        <div class="glass rounded-2xl p-6">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <div class="flex items-center gap-2 mb-2">
+                        <div class="w-8 h-8 bg-blue-500/10 rounded-lg flex items-center justify-center">
+                            <i class="fa-brands fa-facebook text-blue-600 dark:text-blue-400 text-lg"></i>
+                        </div>
+                        <h3 class="font-semibold">Facebook Page</h3>
+                    </div>
+                </div>
+                <div id="facebook-status" class="text-sm"></div>
+            </div>
+            <div id="facebook-info" class="mb-4"></div>
+            <div id="facebook-actions"></div>
+        </div>
+
+        <div class="glass rounded-2xl p-6">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <div class="flex items-center gap-2 mb-2">
+                        <div class="w-8 h-8 bg-pink-500/10 rounded-lg flex items-center justify-center">
+                            <i class="fa-brands fa-instagram text-pink-600 dark:text-pink-400 text-lg"></i>
+                        </div>
+                        <h3 class="font-semibold">Instagram Business</h3>
+                    </div>
+                </div>
+                <div id="instagram-status" class="text-sm"></div>
+            </div>
+            <div id="instagram-info" class="mb-4"></div>
+            <div id="instagram-actions"></div>
+        </div>
+
+        <div class="glass rounded-2xl p-6">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <div class="flex items-center gap-2 mb-2">
+                        <div class="w-8 h-8 bg-blue-700/10 rounded-lg flex items-center justify-center">
+                            <i class="fa-brands fa-linkedin text-blue-700 dark:text-blue-400 text-lg"></i>
+                        </div>
+                        <h3 class="font-semibold">LinkedIn</h3>
+                    </div>
+                </div>
+                <div id="linkedin-status" class="text-sm"></div>
+            </div>
+            <div id="linkedin-info" class="mb-4"></div>
+            <div id="linkedin-actions"></div>
+        </div>
+
+        <div class="glass rounded-2xl p-6 lg:col-span-2">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <div class="flex items-center gap-2 mb-2">
+                        <div class="w-8 h-8 bg-gray-800/10 dark:bg-gray-200/10 rounded-lg flex items-center justify-center">
+                            <i class="fa-brands fa-threads text-gray-800 dark:text-gray-200 text-lg"></i>
+                        </div>
+                        <h3 class="font-semibold">Threads</h3>
+                    </div>
+                </div>
+                <div id="threads-status" class="text-sm"></div>
+            </div>
+            <div id="threads-info" class="mb-4"></div>
+            <div id="threads-actions"></div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+async function loadAccounts() {
+    try {
+        const accounts = await fetch('/api/accounts').then(r => r.json());
+
+        const authPaths = { youtube: 'youtube', facebook: 'meta', instagram: 'meta', linkedin: 'linkedin', threads: 'threads' };
+        const displayNames = { youtube: 'YouTube', facebook: 'Facebook', instagram: 'Instagram', linkedin: 'LinkedIn', threads: 'Threads' };
+
+        ['youtube', 'facebook', 'instagram', 'linkedin', 'threads'].forEach(p => {
+            const acc = accounts.find(a => a.platform === p);
+            const statusEl = document.getElementById(`${p}-status`);
+            const infoEl = document.getElementById(`${p}-info`);
+            const actionsEl = document.getElementById(`${p}-actions`);
+
+            if (acc) {
+                statusEl.innerHTML = '<span class="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"><span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>Connected</span>';
+                infoEl.innerHTML = getInfoHtml(p, acc);
+                actionsEl.innerHTML = `<button onclick="disconnect('${p}')" class="text-xs px-3 py-1.5 rounded-lg bg-red-500/10 text-red-600 dark:text-red-400 hover:bg-red-500/20 transition-colors">Disconnect</button>`;
+            } else {
+                statusEl.innerHTML = '<span class="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500">Not Connected</span>';
+                infoEl.innerHTML = '<p class="text-sm text-gray-500">Belum terhubung</p>';
+                actionsEl.innerHTML = `<a href="/auth/${authPaths[p]}" class="inline-flex items-center gap-2 text-sm px-4 py-2 rounded-xl bg-primary-600 hover:bg-primary-700 text-white transition-colors"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/></svg> Connect ${displayNames[p]}</a>`;
+            }
+        });
+    } catch (e) {
+        showToast('Gagal memuat daftar akun', 'error');
+    }
+}
+
+function getInfoHtml(platform, acc) {
+    const details = {
+        youtube: acc.channel_name ? `<p class="text-sm font-medium">${acc.channel_name}</p><p class="text-xs text-gray-500">${acc.subscribers} subscribers</p>` : '',
+        facebook: acc.page_name ? `<p class="text-sm font-medium">${acc.page_name}</p>` : '',
+        instagram: acc.instagram_username ? `<p class="text-sm font-medium">@${acc.instagram_username}</p><p class="text-xs text-gray-500">${acc.instagram_name || ''}</p>` : '',
+        linkedin: acc.profile_name ? `<p class="text-sm font-medium">${acc.profile_name}</p><p class="text-xs text-gray-500">${acc.profile_email || ''}</p>` : '',
+        threads: acc.threads_username ? `<p class="text-sm font-medium">@${acc.threads_username}</p><p class="text-xs text-gray-500">${acc.threads_name || ''}</p>` : '',
+    };
+    return details[platform] || '<p class="text-sm text-gray-500">Terhubung</p>';
+}
+
+async function disconnect(platform) {
+    showModal('Disconnect Account', `Yakin ingin memutuskan akun ${platform}?`, async () => {
+        try {
+            const resp = await fetch(`/auth/disconnect/${platform}`, { method: 'POST' });
+            const data = await resp.json();
+            if (data.success) {
+                showToast(data.message, 'success');
+                loadAccounts();
+            }
+        } catch (e) {
+            showToast('Gagal memutuskan akun', 'error');
+        }
+    });
+}
+loadAccounts();
+</script>
+{% endblock %}

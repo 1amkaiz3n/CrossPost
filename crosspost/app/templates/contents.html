@@ -1,0 +1,278 @@
+{% extends "base.html" %}
+{% block page_title %}Contents{% endblock %}
+{% block content %}
+<div class="space-y-5 animate-fade-in">
+    <!-- Platform Stats -->
+    <div id="stats-container" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+        <div class="col-span-full"><div class="loading-spinner mx-auto"></div></div>
+    </div>
+
+    <!-- Filters -->
+    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+        <div class="relative flex-1 min-w-0">
+            <i class="fa-solid fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+            <input type="text" id="search-input" oninput="filterPosts()"
+                class="w-full pl-9 pr-3.5 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all text-gray-900 dark:text-gray-100"
+                placeholder="Cari konten...">
+        </div>
+        <div class="flex items-center gap-2">
+            <select id="platform-filter" onchange="filterPosts()"
+                class="px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-600 dark:text-gray-300 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none">
+                <option value="all">All</option>
+                <option value="youtube">YouTube</option>
+                <option value="facebook">Facebook</option>
+                <option value="instagram">Instagram</option>
+                <option value="linkedin">LinkedIn</option>
+                <option value="threads">Threads</option>
+            </select>
+            <button id="btn-refresh" onclick="fetchPosts()"
+                class="px-3.5 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium transition-colors flex items-center gap-2">
+                <i class="fa-solid fa-rotate" id="refresh-icon"></i>
+                <span class="hidden sm:inline">Refresh</span>
+            </button>
+            <button id="btn-sync" onclick="syncStats()"
+                class="px-3.5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium transition-colors flex items-center gap-2">
+                <i class="fa-solid fa-cloud-arrow-down" id="sync-icon"></i>
+                <span class="hidden sm:inline">Sync Stats</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Loading Skeleton -->
+    <div id="skeleton-container" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+        <div class="bg-white dark:bg-gray-800/80 rounded-xl border border-gray-200/60 dark:border-gray-700/60 overflow-hidden animate-pulse"><div class="h-36 bg-gray-100 dark:bg-gray-700"></div><div class="p-4 space-y-3"><div class="h-4 bg-gray-100 dark:bg-gray-700 rounded w-3/4"></div><div class="h-3 bg-gray-100 dark:bg-gray-700 rounded w-1/2"></div><div class="h-3 bg-gray-100 dark:bg-gray-700 rounded w-full"></div></div></div>
+        <div class="bg-white dark:bg-gray-800/80 rounded-xl border border-gray-200/60 dark:border-gray-700/60 overflow-hidden animate-pulse hidden sm:block"><div class="h-36 bg-gray-100 dark:bg-gray-700"></div><div class="p-4 space-y-3"><div class="h-4 bg-gray-100 dark:bg-gray-700 rounded w-2/3"></div><div class="h-3 bg-gray-100 dark:bg-gray-700 rounded w-1/2"></div><div class="h-3 bg-gray-100 dark:bg-gray-700 rounded w-full"></div></div></div>
+        <div class="bg-white dark:bg-gray-800/80 rounded-xl border border-gray-200/60 dark:border-gray-700/60 overflow-hidden animate-pulse hidden xl:block"><div class="h-36 bg-gray-100 dark:bg-gray-700"></div><div class="p-4 space-y-3"><div class="h-4 bg-gray-100 dark:bg-gray-700 rounded w-3/4"></div><div class="h-3 bg-gray-100 dark:bg-gray-700 rounded w-1/2"></div><div class="h-3 bg-gray-100 dark:bg-gray-700 rounded w-full"></div></div></div>
+    </div>
+
+    <!-- Content Grid -->
+    <div id="contents-grid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5"></div>
+</div>
+
+<!-- Edit Modal -->
+<div id="edit-modal" class="hidden fixed inset-0 bg-black/30 dark:bg-black/60 z-50 flex items-center justify-center p-4" onclick="if(event.target===this)closeEditModal()">
+    <div class="modal-content bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-lg w-full mx-auto shadow-xl border border-gray-200 dark:border-gray-700 space-y-4">
+        <div class="flex items-center justify-between">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Edit Konten</h3>
+            <button onclick="closeEditModal()" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-400"><i class="fa-solid fa-xmark text-lg"></i></button>
+        </div>
+        <div class="space-y-3">
+            <div>
+                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Judul</label>
+                <input type="text" id="edit-title" class="w-full px-3 py-2.5 rounded-lg bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-sm focus:ring-2 focus:ring-primary-500 outline-none text-gray-900 dark:text-white">
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Deskripsi</label>
+                <textarea id="edit-description" rows="4" class="w-full px-3 py-2.5 rounded-lg bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-sm focus:ring-2 focus:ring-primary-500 outline-none text-gray-900 dark:text-white"></textarea>
+            </div>
+        </div>
+        <div class="flex justify-end gap-2">
+            <button onclick="closeEditModal()" class="px-4 py-2 rounded-lg text-sm font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600">Batal</button>
+            <button id="save-edit-btn" class="px-5 py-2 rounded-lg text-sm font-medium bg-primary-600 hover:bg-primary-700 text-white">Simpan</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+let allPosts = [];
+let localUploads = [];
+
+const pc = {
+    youtube: { icon: 'fa-youtube', label: 'YouTube', color: 'red' },
+    facebook: { icon: 'fa-facebook', label: 'Facebook', color: 'blue' },
+    instagram: { icon: 'fa-instagram', label: 'Instagram', color: 'pink' },
+    linkedin: { icon: 'fa-linkedin', label: 'LinkedIn', color: 'blue-700' },
+    threads: { icon: 'fa-threads', label: 'Threads', color: 'gray' }
+};
+
+function calcStats() {
+    const container = document.getElementById('stats-container');
+    let counts = {};
+    Object.keys(pc).forEach(k => counts[k] = 0);
+    allPosts.forEach(p => { if (counts[p.platform] !== undefined) counts[p.platform]++; });
+    container.innerHTML = Object.entries(pc).map(([k, v]) => {
+        const c = counts[k] || 0;
+        return `
+        <div class="bg-white dark:bg-gray-800/80 rounded-xl p-3.5 border border-gray-200/60 dark:border-gray-700/60 hover:shadow-sm transition-shadow">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-${v.color}-500 to-${v.color}-600 flex items-center justify-center shadow-sm">
+                    <i class="fa-brands ${v.icon} text-white text-sm"></i>
+                </div>
+                <div class="min-w-0">
+                    <p class="text-[11px] text-gray-500 dark:text-gray-400 font-medium">${v.label}</p>
+                    <p class="text-lg font-bold text-gray-900 dark:text-white">${c}</p>
+                </div>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+async function fetchPosts() {
+    document.getElementById('skeleton-container').classList.remove('hidden');
+    document.getElementById('contents-grid').innerHTML = '';
+    const btn = document.getElementById('btn-refresh');
+    btn.disabled = true;
+    document.getElementById('refresh-icon').classList.add('fa-spin');
+    const b = '?t=' + Date.now();
+
+    try {
+        const [pr, ur] = await Promise.all([
+            fetch('/api/contents' + b),
+            fetch('/api/upload' + b)
+        ]);
+        allPosts = await pr.json();
+        localUploads = await ur.json();
+        calcStats();
+        filterPosts();
+    } catch (e) {
+        document.getElementById('contents-grid').innerHTML = '<div class="col-span-full text-center py-16"><i class="fa-solid fa-triangle-exclamation text-red-400 text-3xl mb-3"></i><p class="text-gray-500 text-sm">Gagal mengambil data</p></div>';
+    } finally {
+        btn.disabled = false;
+        document.getElementById('refresh-icon').classList.remove('fa-spin');
+        document.getElementById('skeleton-container').classList.add('hidden');
+    }
+}
+
+async function syncStats() {
+    const btn = document.getElementById('btn-sync');
+    const icon = document.getElementById('sync-icon');
+    btn.disabled = true;
+    icon.classList.add('fa-spin');
+
+    try {
+        const r = await fetch('/api/contents/sync', { method: 'POST' });
+        const d = await r.json();
+        if (d.success) {
+            showToast(`Stats synced: ${d.synced} updated, ${d.errors} errors`, d.errors ? 'warning' : 'success');
+            fetchPosts();
+        } else {
+            showToast('Sync failed', 'error');
+        }
+    } catch (e) {
+        showToast('Sync error', 'error');
+    } finally {
+        btn.disabled = false;
+        icon.classList.remove('fa-spin');
+    }
+}
+
+function filterPosts() {
+    const q = document.getElementById('search-input').value.toLowerCase().trim();
+    const pf = document.getElementById('platform-filter').value;
+    let f = allPosts;
+    if (pf !== 'all') f = f.filter(p => p.platform === pf);
+    if (q) f = f.filter(p => (p.title||'').toLowerCase().includes(q) || (p.description||'').toLowerCase().includes(q) || (p.platform||'').toLowerCase().includes(q));
+    renderPosts(f);
+}
+
+function renderPosts(posts) {
+    const grid = document.getElementById('contents-grid');
+    if (!posts.length) {
+        grid.innerHTML = '<div class="col-span-full text-center py-16"><i class="fa-solid fa-inbox text-gray-300 text-4xl mb-4"></i><p class="text-gray-400 text-sm">Tidak ada konten</p></div>';
+        return;
+    }
+    grid.innerHTML = posts.map((p, idx) => {
+        const cf = pc[p.platform] || { icon: 'fa-circle', label: p.platform, color: 'gray' };
+        let thumb = '';
+        if (p.thumbnail) {
+            thumb = `
+            <div class="relative bg-gray-50 overflow-hidden" style="aspect-ratio:16/9">
+                <img src="${p.thumbnail}" alt="" class="w-full h-full object-contain p-2" loading="lazy" onerror="this.parentElement.innerHTML='<div class=\\'w-full h-full flex items-center justify-center text-gray-300 text-2xl\\'><i class=\\'fa-solid fa-image\\'></i></div>'">
+                ${p.media_type === 'video' ? '<div class="absolute inset-0 flex items-center justify-center"><div class="w-9 h-9 rounded-full bg-black/40 flex items-center justify-center backdrop-blur-sm"><i class="fa-solid fa-play text-white text-xs ml-0.5"></i></div></div>' : ''}
+            </div>`;
+        }
+        const ds = (p.published_at || p.created_at) ? new Date(p.published_at || p.created_at).toLocaleDateString('id-ID', {year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}) : '';
+        const ls = p.last_synced_at ? new Date(p.last_synced_at).toLocaleDateString('id-ID', {year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}) : null;
+        const title = p.title || '(no title)';
+        const desc = p.description || '';
+        return `
+        <div class="bg-white dark:bg-gray-800/80 rounded-xl border border-gray-200/60 dark:border-gray-700/60 overflow-hidden flex flex-col hover:shadow-md hover:border-gray-300/80 dark:hover:border-gray-600/80 transition-all duration-200 animate-fade-in" style="animation-delay:${idx*40}ms">
+            ${p.thumbnail ? `<a href="${p.url}" target="_blank" rel="noopener" class="block">${thumb}</a>` : ''}
+            <div class="p-4 flex-1 flex flex-col justify-between space-y-3">
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between gap-2">
+                        <div class="flex items-center gap-1.5">
+                            <i class="fa-brands ${cf.icon} text-${cf.color}-600 text-xs"></i>
+                            <span class="text-xs font-medium text-${cf.color}-600">${cf.label}</span>
+                        </div>
+                        <span class="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 capitalize">${p.media_type || 'text'}</span>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-semibold text-gray-800 dark:text-gray-100 leading-snug line-clamp-2">${esc(title)}</h3>
+                        ${desc ? `<p class="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">${esc(desc)}</p>` : ''}
+                    </div>
+                </div>
+                    <div class="pt-3 border-t border-gray-100 dark:border-gray-700 space-y-3">
+                        <div class="flex items-center justify-between text-xs text-gray-400 dark:text-gray-500">
+                            <div class="flex items-center gap-3">
+                                <span class="flex items-center gap-1" title="Views"><i class="fa-regular fa-eye"></i>${p.views != null ? fmt(p.views) : '<span class="text-gray-300 dark:text-gray-600">N/A</span>'}</span>
+                                <span class="flex items-center gap-1" title="Likes"><i class="fa-regular fa-thumbs-up"></i>${p.likes != null ? fmt(p.likes) : '<span class="text-gray-300 dark:text-gray-600">N/A</span>'}</span>
+                                <span class="flex items-center gap-1" title="Comments"><i class="fa-regular fa-comment"></i>${p.comments != null ? fmt(p.comments) : '<span class="text-gray-300 dark:text-gray-600">N/A</span>'}</span>
+                            </div>
+                            ${ds ? `<span class="text-gray-400">${ds}</span>` : ''}
+                        </div>
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <a href="${p.url}" target="_blank" rel="noopener" class="text-xs px-3 py-1.5 rounded-lg bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 hover:bg-primary-100 dark:hover:bg-primary-800/30 transition-colors inline-flex items-center gap-1">
+                                <i class="fa-solid fa-up-right-from-square text-[10px]"></i> Buka
+                            </a>
+                            ${ls ? `<span class="text-[10px] text-gray-400 dark:text-gray-500" title="Last synced: ${ls}"><i class="fa-regular fa-clock"></i></span>` : ''}
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <button onclick="openEditModal('${p.id}', \`${esc(title).replace(/`/g,'\\`')}\`, \`${esc(desc).replace(/`/g,'\\`')}\`)" class="p-1.5 rounded-lg hover:bg-yellow-50 text-yellow-600 transition-colors" title="Edit"><i class="fa-solid fa-pen text-xs"></i></button>
+                            <button onclick="deleteContent('${p.id}')" class="p-1.5 rounded-lg hover:bg-red-50 text-red-500 transition-colors" title="Hapus"><i class="fa-solid fa-trash-can text-xs"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function fmt(n) { if (n===null||n===undefined||n===''||isNaN(n)) return null; n=Number(n); if(n>=1e6)return (n/1e6).toFixed(1)+'M';if(n>=1e3)return (n/1e3).toFixed(1)+'K';return n.toString(); }
+function esc(t) { if(!t)return ''; const d=document.createElement('div'); d.textContent=t; return d.innerHTML; }
+
+function openEditModal(id, title, desc) {
+    document.getElementById('edit-title').value = title;
+    document.getElementById('edit-description').value = desc;
+    document.getElementById('edit-modal').classList.remove('hidden');
+    document.getElementById('edit-modal').dataset.id = id;
+}
+function closeEditModal() { document.getElementById('edit-modal').classList.add('hidden'); }
+
+document.getElementById('save-edit-btn').addEventListener('click', async () => {
+    const modal = document.getElementById('edit-modal');
+    const id = modal.dataset.id;
+    if (!id) return;
+    const title = document.getElementById('edit-title').value.trim();
+    const description = document.getElementById('edit-description').value.trim();
+    try {
+        const r = await fetch(`/api/contents/${id}`, {method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({title,description})});
+        const d = await r.json();
+        if (d.success) { showToast('Konten berhasil diupdate','success'); closeEditModal(); fetchPosts(); }
+        else showToast(d.message||'Gagal','error');
+    } catch(e) { showToast('Gagal mengupdate','error'); }
+});
+
+function deleteContent(id) {
+    const post = allPosts.find(p => p.id === id);
+    const platformLabel = post ? (pc[post.platform]?.label || post.platform) : 'ini';
+    showModal('Hapus dari ' + platformLabel, 'Yakin ingin menghapus konten ini dari ' + platformLabel + '? Post akan langsung terhapus dari platform, bukan cuma dari database.', async ()=>{
+        try {
+            const r = await fetch(`/api/contents/${id}`,{method:'DELETE'});
+            const d = await r.json();
+            if (d.success) {
+                const msg = d.warning ? d.warning : 'Konten berhasil dihapus dari ' + platformLabel;
+                showToast(msg, d.warning ? 'warning' : 'success');
+                fetchPosts();
+            } else {
+                showToast(d.detail || 'Gagal menghapus','error');
+            }
+        } catch(e) { showToast('Gagal menghapus','error'); }
+    });
+}
+
+fetchPosts();
+</script>
+{% endblock %}
